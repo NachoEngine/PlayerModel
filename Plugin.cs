@@ -21,19 +21,11 @@ namespace PlayerModel
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-        bool inRoom;
 
         public bool Cheaking = true;
-        // private static GameObject banana;
-        public static readonly string assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-#pragma warning disable IDE0051 // IDE0051: Remove unused member
-
-
-        
 
         GameObject gorillabody;//base gorilla gameobject
 
-        
         void Awake()
         {
             Utilla.Events.RoomJoined += RoomJoined;
@@ -87,28 +79,35 @@ namespace PlayerModel
             for(int i=0; i<fileName.Length; i++)
             {
                 fileName[i] = Path.GetFileName(files[i]); //getting file names from directories
-                Debug.Log("Found "+fileName[i]+" Player model");
+                //Debug.Log("Found "+fileName[i]+" Player model");
             }
 
             gorillabody = GameObject.Find("OfflineVRRig/Actual Gorilla/gorilla");
             
             Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlayerModel.Assets.misc");
-            AssetBundle bundle = AssetBundle.LoadFromStream(str);
-            Debug.Log("loaded from str");
-            GameObject asset = bundle.LoadAsset<GameObject>("pm_stand");
-            Instantiate(asset);
-            Debug.Log("stand loaded");
-            GameObject pm_stand = GameObject.Find("GorillaTag_PlayerModelMod_Stand");
-            if (pm_stand == null)
+            if(str != null)
             {
-                Debug.LogError("cant find pm_stand");
+                AssetBundle bundle = AssetBundle.LoadFromStream(str);
+                if(bundle != null)
+                {
+                    GameObject asset = bundle.LoadAsset<GameObject>("pm_stand");
+                    if(asset != null)
+                    {
+                        Instantiate(asset);
+                    }
+                    
+                }
+                
             }
-            Debug.Log("Found pm_stand");
+            
+            
+            GameObject pm_stand = GameObject.Find("GorillaTag_PlayerModelMod_Stand");
+            
             pm_stand.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
             pm_stand.transform.localRotation = Quaternion.Euler(-90f, -60f, 0f);
             pm_stand.AddComponent<MeshCollider>();
 
-            Debug.Log("set stand transform");
+            
 
 
 
@@ -117,20 +116,20 @@ namespace PlayerModel
             GameObject Select_on = GameObject.Find("Select_on");
             ButtonTrigger.AssignButton(SelectButton, Select_on);
 
-            Debug.Log("select button set");
+            
 
             RightButton = GameObject.Find("right_button");
             GameObject RightButton_on = GameObject.Find("RightButton_on");
             
             ButtonTrigger.AssignButton(RightButton, RightButton_on);
             
-            Debug.Log("rightButton set");
+            
 
             LeftButton = GameObject.Find("left_button");
             GameObject LeftButton_on = GameObject.Find("LeftButton_on");
             ButtonTrigger.AssignButton(LeftButton, LeftButton_on);
 
-            Debug.Log("leftButton set");
+            
             STARTPLAYERMOD = true;
         }
 
@@ -174,7 +173,7 @@ namespace PlayerModel
                     {
                         if (clone_body != null && playermodel != null)
                         {
-                            Debug.Log("Found clone_body and playermodel");
+                            
                             Showgorilla.HideOnlineRig();
                             Showgorilla.HideOfflineRig();
 
@@ -184,7 +183,7 @@ namespace PlayerModel
                         if (clone_body == null)
                         {
                             clone_body = GameObject.Find("GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-                            Debug.Log("Finding clone_body");
+                            
                         }
                         if (playermodel == null)
                         {
@@ -192,7 +191,7 @@ namespace PlayerModel
                             {
                                 PlayerModelController.LoadModel(assignedIndex);
                                 playermodel = GameObject.Find("playermodel.body");
-                                Debug.Log("Finding playermodel");
+                                
                                 PlayerModelController.AssignModel();
                             }
 
@@ -263,13 +262,13 @@ namespace PlayerModel
                                     playermodel = GameObject.Find("playermodel.body");
                                 }
                                 assignedIndex = playerIndex;
-                                Debug.Log("Model to model");
+                                
                             }
 
 
                         }
 
-                        Debug.Log("Select Button Pressed");
+                        
                     }
                 }
                 else
@@ -298,7 +297,7 @@ namespace PlayerModel
                         }
 
 
-                        Debug.Log("Left Button Pressed");
+                        
                     }
                 }
                 else
@@ -318,7 +317,7 @@ namespace PlayerModel
                         }
 
 
-                        Debug.Log("Right Button Pressed");
+                        
                     }
                 }
                 else
@@ -336,7 +335,7 @@ namespace PlayerModel
             /* Activate your mod here */
             /* This code will run regardless of if the mod is enabled*/
 
-            inRoom = true;
+            
     
 
         }
@@ -348,7 +347,7 @@ namespace PlayerModel
             /* Deactivate your mod here */
             /* This code will run regardless of if the mod is enabled*/
 
-            inRoom = false;
+            
         }
 
         private void RoomJoined(object sender, Events.RoomJoinedArgs e)

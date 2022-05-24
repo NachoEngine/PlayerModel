@@ -34,7 +34,6 @@ namespace showgorilla
             clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = true;
         }
 
-
         static public void HideOfflineRig()
         {
             GameObject gorillaface = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/head/gorillaface");
@@ -46,9 +45,7 @@ namespace showgorilla
 
             GameObject gorillachest = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/gorillachest");
             gorillachest.GetComponent<Renderer>().forceRenderingOff = true;
-
-
-            
+ 
         }
 
         static public void ShowOfflineRig()
@@ -94,7 +91,7 @@ namespace showgorilla
             if (last_gorillacolor != gorillacolor)
             {
                 last_gorillacolor = gorillacolor;
-                Debug.Log("Color ChangedEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                
                 last_gorillacolor = gorillacolor;
                 playermodel.GetComponent<SkinnedMeshRenderer>().material.SetVector("_Color", gorillacolor);
                 

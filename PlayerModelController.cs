@@ -43,6 +43,10 @@ public class PlayerModelController : MonoBehaviour
             GameObject LeftTarget = GameObject.Find(HandRight.name + " Target");
             GameObject RightTarget = GameObject.Find(HandLeft.name + " Target");
 
+            GameObject poleR = GameObject.Find("poleR");
+            GameObject poleL = GameObject.Find("poleL");
+            Destroy(poleR);
+            Destroy(poleL);
             Destroy(LeftTarget);
             Destroy(RightTarget);
             Destroy(root);
@@ -69,6 +73,8 @@ public class PlayerModelController : MonoBehaviour
     public static GameObject root;
     public static GameObject headbone;
     public static GameObject headtarget;
+    public static GameObject poleR;
+    public static GameObject poleL;
 
     public static Quaternion headoffset;
     static public void LoadModel(int index)
@@ -107,12 +113,21 @@ public class PlayerModelController : MonoBehaviour
         offsetR.transform.SetParent(GameObject.Find("hand.R").transform, false);
         offsetL.transform.localRotation = Quaternion.Euler(180f, 180f, 90f);
         offsetR.transform.localRotation = Quaternion.Euler(180f, 180f, -90f);
+        poleR = new GameObject("poleR");
+        poleR.transform.SetParent(root.transform, false);
+        poleL = new GameObject("poleL");
+        poleL.transform.SetParent(root.transform, false);
+        
+        poleL.transform.localPosition = new Vector3(-5f, -5f, -10);
+        poleR.transform.localPosition = new Vector3(5f, -5f, -10);
 
         HandLeft.AddComponent<FastIKFabric>();
         HandLeft.GetComponent<FastIKFabric>().Target = offsetL.transform;
+        HandLeft.GetComponent<FastIKFabric>().Pole = poleL.transform;
 
         HandRight.AddComponent<FastIKFabric>();
         HandRight.GetComponent<FastIKFabric>().Target = offsetR.transform;
+        HandRight.GetComponent<FastIKFabric>().Pole = poleR.transform;
         root.transform.SetParent(GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body").transform, false);
         root.transform.localRotation = Quaternion.Euler(0f, 0.0f, 0.0f);
 
@@ -120,5 +135,6 @@ public class PlayerModelController : MonoBehaviour
         headoffset = headtarget.transform.localRotation;
         headbone.transform.SetParent(headtarget.transform, true);
         headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
+
     }
 }
