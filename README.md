@@ -1,6 +1,8 @@
 # PlayerModelMod
 Requires Utilla
 
+FastIKFabric.cs by https://github.com/ditzel/SimpleIK
+
 Install it using MonkeModManager here:
 
 https://github.com/DeadlyKitten/MonkeModManager/releases/tag/1.3.0
