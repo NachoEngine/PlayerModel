@@ -7,7 +7,8 @@ using System.Reflection;
 using System.IO;
 using Photon.Pun;
 using UnityEngine.UI;
-
+using System.Collections.Generic;
+using System.Linq;
 
 public class PlayerModelController : MonoBehaviour
 {
@@ -18,20 +19,86 @@ public class PlayerModelController : MonoBehaviour
 
     static public string playermodel_lefthand = "playermodel.lefthand";
     static public string playermodel_righthand = "playermodel.righthand";
-    static public GameObject playermodel_preview;
+
+    
+    static public string player_info_stream;
+
+    static public string[] player_info;
+
+    static public string playermodel_name;
+    static public string playermodel_author;
+    static public bool CustomColors;
+    static public bool GameModeTextures;
+
+    static public GameObject player_preview;
     static public string namegui;
     static public void PreviewModel(int index)
     {
-        
-        Text mytext = misc_orb.AddComponent<Text>();
-        mytext.text = PlayerModel.Plugin.fileName[index];
-    }
-    
+       if(player_preview != null)
+        {
+            Destroy(player_preview);
+        }
+        AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
+        if (playerbundle != null)
+        {
+            GameObject assetplayer = playerbundle.LoadAsset<GameObject>("playermodel.ParentObject");
+            if (assetplayer != null)
+            {
+                var parentAsset = Instantiate(assetplayer);
 
-    
+                playerbundle.Unload(false);
+
+                player_info_stream = parentAsset.GetComponent<Text>().text;
+                player_info = player_info_stream.Split('$');
+                
+                playermodel_name = player_info[0];
+                playermodel_author = player_info[1];
+
+                Debug.Log(player_info_stream);
+                // easy code really
+                player_body = parentAsset.transform.GetChild(0).gameObject.transform.Find("playermodel.body").gameObject;
+                
+                List<Material> material_list = player_body.GetComponent<SkinnedMeshRenderer>().materials.ToList();
+                
+                Material[] material_array = material_list.ToArray();
+                
+                player_preview = new GameObject("playemodel.preview");
+                var meshFilter = player_preview.AddComponent<MeshFilter>();
+                Mesh originalMesh = player_body.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+                meshFilter.mesh = originalMesh;
+                MeshRenderer rend = player_preview.AddComponent<MeshRenderer>();//easy code really
+                rend.materials = material_array;
+                player_preview.transform.localScale = player_body.transform.localScale;
+                player_preview.transform.position = PlayerModel.Plugin.misc_preview.transform.position;
+                Quaternion rot = Quaternion.Euler(-90f, -60f, 0f);
+                player_preview.transform.rotation = rot;
+                Debug.Log(player_preview.transform.rotation.eulerAngles);
+
+                PlayerModel.Plugin.model_text.text = playermodel_name.ToUpper(); ;
+                PlayerModel.Plugin.author_text.text = playermodel_author.ToUpper();
+                
+                PlayerModel.Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
+                
+                Destroy(parentAsset);
+
+                Debug.Log(player_preview);
+
+                
+
+            }
+        }
+
+    }
+
+    static public GameObject player_body;
+
+
     static public void UnloadModel(int index)
     {
-        GameObject playermodel = GameObject.Find(PlayerModel.Plugin.fileName[index] + "(Clone)");
+        GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
+        GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
+
+        GameObject playermodel = GameObject.Find("playermodel.ParentObject(Clone)");
         if(playermodel != null)
         {
             GameObject headbone = GameObject.Find(playermodel_head);
@@ -40,11 +107,11 @@ public class PlayerModelController : MonoBehaviour
             GameObject offsetL =  GameObject.Find("offsetL");
             GameObject offsetR =  GameObject.Find("offsetR");
             GameObject root = GameObject.Find(playermodel_torso);
-            GameObject LeftTarget = GameObject.Find(HandRight.name + " Target");
-            GameObject RightTarget = GameObject.Find(HandLeft.name + " Target");
-
+            GameObject LeftTarget = GameObject.Find("playermodel.lefthandpos" + " Target");
+            GameObject RightTarget = GameObject.Find("playermodel.righthandpos" + " Target");
             GameObject poleR = GameObject.Find("poleR");
             GameObject poleL = GameObject.Find("poleL");
+
             Destroy(poleR);
             Destroy(poleL);
             Destroy(LeftTarget);
@@ -79,16 +146,28 @@ public class PlayerModelController : MonoBehaviour
     public static Quaternion headoffset;
     static public void LoadModel(int index)
     {
+        
+        
         AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
         if(playerbundle != null)
         {
-            GameObject assetplayer = playerbundle.LoadAsset<GameObject>(PlayerModel.Plugin.fileName[index]);
+            GameObject assetplayer = playerbundle.LoadAsset<GameObject>("playermodel.ParentObject");//this breaks your code dev all player bundle is the same name
             if(assetplayer != null)
             {
-                Instantiate(assetplayer);
+                var parentAsset = Instantiate(assetplayer);
 
                 playerbundle.Unload(false);
 
+
+                player_info_stream = parentAsset.GetComponent<Text>().text;
+                player_info = player_info_stream.Split('$');
+
+                
+                CustomColors = bool.Parse(player_info[2]);
+
+                GameModeTextures = bool.Parse(player_info[3]);
+                Debug.Log("custom colors = " + CustomColors);
+                Debug.Log("Game Mode Textures = " + GameModeTextures);
                 Debug.Log("Attempting to load " + PlayerModel.Plugin.fileName[index] + " model");
                 
                 offsetL = new GameObject("offsetL");
@@ -102,17 +181,39 @@ public class PlayerModelController : MonoBehaviour
                 
                 headbone = GameObject.Find(playermodel_head);
                 headtarget = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/head");
-                
+
+                PlayerModel.Plugin.player_main_material = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().material; //saves playermodel material
+
+
             }
         }
     }
-
+   
     static public void AssignModel()
     {
-        offsetL.transform.SetParent(GameObject.Find("hand.L").transform, false);
-        offsetR.transform.SetParent(GameObject.Find("hand.R").transform, false);
-        offsetL.transform.localRotation = Quaternion.Euler(180f, 180f, 90f);
-        offsetR.transform.localRotation = Quaternion.Euler(180f, 180f, -90f);
+        GameObject left_finger = GameObject.Find("playermodel.left_finger");
+        GameObject right_finger = GameObject.Find("playermodel.right_finger");
+
+        if(left_finger != null && right_finger != null)
+        {
+            left_finger.AddComponent<SphereCollider>().radius = 0.01f;
+            right_finger.AddComponent<SphereCollider>().radius = 0.01f;
+            left_finger.layer = 10;
+            right_finger.layer = 10;
+
+            GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
+            GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
+
+        }
+        
+        GameObject hand_l = GameObject.Find("hand.L");
+        GameObject hand_r = GameObject.Find("hand.R");
+
+        offsetL.transform.SetParent(hand_l.transform, false);
+
+        offsetR.transform.SetParent(hand_r.transform, false);
+
+
         poleR = new GameObject("poleR");
         poleR.transform.SetParent(root.transform, false);
         poleL = new GameObject("poleL");
@@ -120,6 +221,38 @@ public class PlayerModelController : MonoBehaviour
         
         poleL.transform.localPosition = new Vector3(-5f, -5f, -10);
         poleR.transform.localPosition = new Vector3(5f, -5f, -10);
+
+        GameObject lefthandpos = new GameObject("playermodel.lefthandpos");
+        GameObject righthandpos = new GameObject("playermodel.righthandpos");
+
+        GameObject lefthandparent = HandLeft.transform.parent.gameObject;
+        GameObject righthandparent = HandRight.transform.parent.gameObject;
+
+        lefthandpos.transform.SetParent(lefthandparent.transform, false);
+        righthandpos.transform.SetParent(righthandparent.transform, false);
+
+        lefthandpos.transform.SetPositionAndRotation(HandLeft.transform.position, HandLeft.transform.rotation);
+        righthandpos.transform.SetPositionAndRotation(HandRight.transform.position, HandRight.transform.rotation);
+
+
+        HandLeft.transform.SetPositionAndRotation(hand_l.transform.position, hand_l.transform.rotation);
+        HandRight.transform.SetPositionAndRotation(hand_r.transform.position, hand_r.transform.rotation);
+
+        Quaternion rotL = Quaternion.Euler(HandLeft.transform.localRotation.eulerAngles.x, HandLeft.transform.localRotation.eulerAngles.y, HandLeft.transform.localRotation.eulerAngles.z + 20f);
+        Quaternion rotR = Quaternion.Euler(HandRight.transform.localRotation.eulerAngles.x, HandRight.transform.localRotation.eulerAngles.y, HandRight.transform.localRotation.eulerAngles.z - 20f);
+
+        HandLeft.transform.position = hand_l.transform.position;
+        HandRight.transform.position = hand_r.transform.position;
+
+        HandLeft.transform.localRotation = rotL;
+        HandRight.transform.localRotation = rotR;
+
+        HandLeft.transform.SetParent(hand_l.transform, true);
+        HandRight.transform.SetParent(hand_r.transform, true);
+
+        HandLeft = lefthandpos;
+        HandRight = righthandpos;
+
 
         HandLeft.AddComponent<FastIKFabric>();
         HandLeft.GetComponent<FastIKFabric>().Target = offsetL.transform;

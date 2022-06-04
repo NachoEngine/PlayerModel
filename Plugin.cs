@@ -2,20 +2,16 @@
 using System;
 using UnityEngine;
 using Utilla;
-using DitzelGames.FastIK;
 using System.Reflection;
 using System.IO;
 using Photon.Pun;
 using showgorilla;
 using UnityEngine.UI;
 
+
 namespace PlayerModel
 {
-    /// <summary>
-    /// This is your mod's main class.
-    /// </summary>
 
-    /* This attribute tells Utilla to look for [ModdedGameJoin] and [ModdedGameLeave] */
     [ModdedGamemode]
     [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.0")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -25,14 +21,6 @@ namespace PlayerModel
         public bool Cheaking = true;
 
         GameObject gorillabody;//base gorilla gameobject
-
-        void Awake()
-        {
-            Utilla.Events.RoomJoined += RoomJoined;
-            Utilla.Events.RoomLeft += RoomLeft;
-
-            
-        }
 
         void OnEnable()
         {
@@ -70,7 +58,7 @@ namespace PlayerModel
                 Directory.CreateDirectory(playerpath);
             }
 
-            files = Directory.GetFiles(playerpath);//cant Path.GetFileName - cant convert string[] to string
+            files = Directory.GetFiles(playerpath , "*.gtmodel");//cant Path.GetFileName - cant convert string[] to string
             foreach (var file in files)
             {
                 Debug.Log(file);
@@ -85,61 +73,97 @@ namespace PlayerModel
             gorillabody = GameObject.Find("OfflineVRRig/Actual Gorilla/gorilla");
             
             Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlayerModel.Assets.misc");
-            if(str != null)
+            AssetBundle bundle = AssetBundle.LoadFromStream(str);
+            GameObject asset = bundle.LoadAsset<GameObject>("misc");
+            var localasset = Instantiate(asset);
+
+            Debug.Log("loaded misc");
+
+            GameObject misc = localasset.transform.GetChild(0).gameObject;
+            Debug.Log("found misc child");
+
+            misc.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
+            misc.transform.localRotation = Quaternion.Euler(0f, -60f, 0f);
+            
+
+            
+            SelectButton = misc.transform.Find("misc.selector").gameObject;
+            ButtonTrigger.AssignButton(SelectButton);
+
+            RightButton = misc.transform.Find("misc.rightpage").gameObject;
+            ButtonTrigger.AssignButton(RightButton);
+
+            LeftButton = misc.transform.Find("misc.leftpage").gameObject;
+            ButtonTrigger.AssignButton(LeftButton);
+            Debug.Log("Find Canvas");
+            GameObject canvasText = misc.transform.Find("Canvas").gameObject;
+            Debug.Log("found canvas");
+            
+            GameObject modelText = canvasText.transform.Find("model.text").gameObject;
+            GameObject authorText = canvasText.transform.Find("author.text").gameObject;
+
+            model_text = modelText.GetComponent<Text>();
+            author_text = authorText.GetComponent<Text>();
+            
+            
+            misc_preview = GameObject.Find("misc.preview");
+
+            misc_orbs = new GameObject[4];
+            misc_orbs[0] = GameObject.Find("misc.fur");
+            misc_orbs[1] = GameObject.Find("misc.lava");
+            misc_orbs[2] = GameObject.Find("misc.rock");
+            misc_orbs[3] = GameObject.Find("misc.ice");
+            
+            for(int i=0; i<misc_orbs.Length; i++)
             {
-                AssetBundle bundle = AssetBundle.LoadFromStream(str);
-                if(bundle != null)
-                {
-                    GameObject asset = bundle.LoadAsset<GameObject>("pm_stand");
-                    if(asset != null)
-                    {
-                        Instantiate(asset);
-                    }
-                    
-                }
-                
+                ButtonTrigger.AssignButton(misc_orbs[i]);
             }
             
+            mat_preview = new Material[misc_orbs.Length];
             
-            GameObject pm_stand = GameObject.Find("GorillaTag_PlayerModelMod_Stand");
+            for(int i=0;i< mat_preview.Length; i++)
+            {
+                mat_preview[i] = misc_orbs[i].GetComponent<MeshRenderer>().material;
+            }
             
-            pm_stand.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
-            pm_stand.transform.localRotation = Quaternion.Euler(-90f, -60f, 0f);
-            pm_stand.AddComponent<MeshCollider>();
+            GameObject left_empty = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            GameObject right_empty = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //for hand placement
+            left_empty.GetComponent<SphereCollider>().enabled = false;
+            right_empty.GetComponent<SphereCollider>().enabled = false;
 
+            left_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
+            right_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
             
+            GameObject hand_l = GameObject.Find("hand.L");
+            GameObject hand_r = GameObject.Find("hand.R");
 
+            Quaternion rotL = Quaternion.Euler(hand_l.transform.rotation.x, hand_l.transform.rotation.y, hand_l.transform.rotation.z + 27f);
 
+            Quaternion rotR = Quaternion.Euler(hand_r.transform.rotation.x, hand_r.transform.rotation.y, hand_r.transform.rotation.z - 27f);
 
-
-            SelectButton = GameObject.Find("selector");
-            GameObject Select_on = GameObject.Find("Select_on");
-            ButtonTrigger.AssignButton(SelectButton, Select_on);
-
-            
-
-            RightButton = GameObject.Find("right_button");
-            GameObject RightButton_on = GameObject.Find("RightButton_on");
-            
-            ButtonTrigger.AssignButton(RightButton, RightButton_on);
-            
-            
-
-            LeftButton = GameObject.Find("left_button");
-            GameObject LeftButton_on = GameObject.Find("LeftButton_on");
-            ButtonTrigger.AssignButton(LeftButton, LeftButton_on);
 
             
+
             STARTPLAYERMOD = true;
+            if (STARTPLAYERMOD)
+            {
+                PlayerModelController.PreviewModel(playerIndex);
+            }
+            
         }
-
-
-        
+        static public Material[] mat_preview;
+        static public GameObject[] misc_orbs;
+        static public int mat_index;
+        static public Text model_text;
+        static public Text author_text;
+        static public GameObject misc_preview;
+        static public Material player_main_material;
         public GameObject SelectButton;
         public GameObject RightButton;
         public GameObject LeftButton;
 
-        
+        public bool nachotext = false;
         public bool IsGorilla = true;
         public int playerIndex = 0;
         public GameObject playermodel;
@@ -151,17 +175,18 @@ namespace PlayerModel
         public bool flag_inroom = true;
         public bool STARTPLAYERMOD = false;
         public int assignedIndex = 0;// index of array, 
+
         void FixedUpdate()
         {
+           
             if (STARTPLAYERMOD == true)
             {
-
-
+                
                 if (PhotonNetwork.InRoom)
                 {
                     if (IsGorilla == true)//in a room, is gorilla model
                     {
-
+                        
                         flag_inroom = true;
                         Showgorilla.flag1 = true;
 
@@ -177,8 +202,19 @@ namespace PlayerModel
                             Showgorilla.HideOnlineRig();
                             Showgorilla.HideOfflineRig();
 
-                            Showgorilla.AssignColor(playermodel);
-                            Showgorilla.AssignMaterial(clone_body, playermodel);
+                            
+                            if (PlayerModelController.CustomColors)
+                            {
+                                
+                                Showgorilla.AssignColor(playermodel);
+                            }
+
+                            if (PlayerModelController.GameModeTextures)
+                            {
+                                Showgorilla.AssignMaterial(clone_body, playermodel);
+                            }
+                            
+                            
                         }
                         if (clone_body == null)
                         {
@@ -193,57 +229,62 @@ namespace PlayerModel
                                 playermodel = GameObject.Find("playermodel.body");
                                 
                                 PlayerModelController.AssignModel();
+                                
                             }
 
-
                         }
-
-
 
                     }
                 }
                 else if (!PhotonNetwork.InRoom)
                 {
+
                     flag_inroom = false;
                     clone_body = null;
                     if (IsGorilla == true)//not in a room, is gorilla model
                     {
                         Showgorilla.flag1 = true;
                         Showgorilla.ShowOfflineRig();
+                        
                     }
                     else//not in a room, is playermodel
                     {
+                        Showgorilla.ResetMaterial(playermodel);
                         Showgorilla.HideOfflineRig();
-                        Showgorilla.AssignColor(playermodel);
-                        Showgorilla.ResetMaterial(playermodel); //not in a lobby, reset back to darkfur material
+                        if (PlayerModelController.CustomColors)
+                        {
+
+                            Showgorilla.AssignColor(playermodel);
+                        }
+                        
                     }
 
                 }
 
-
-
                 if (SelectButton.GetComponent<ButtonTrigger>().pressed == true)
                 {
+                    if(nachotext == false)
+                    {
+                        Destroy(GameObject.Find("nachoengine_playermodelmod"));
+                        nachotext = true;
+                    }
+                    SelectButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
                     if (selectflag == true)
                     {
                         selectflag = false;
                         if (IsGorilla == true)//switching from gorilla to playermodel
                         {
-
-
                             while (playermodel == null)
                             {
+                                Debug.Log("Gorilla to player model loading");
                                 PlayerModelController.LoadModel(playerIndex);
                                 playermodel = GameObject.Find("playermodel.body");
+                                
                             }
                             assignedIndex = playerIndex;
                             IsGorilla = false;
+                            Debug.Log("Gorilla to player model loaded");
                             PlayerModelController.AssignModel();
-
-
-
-
-
                         }
                         else//model to model
                         {
@@ -251,42 +292,38 @@ namespace PlayerModel
                             {
                                 PlayerModelController.UnloadModel(assignedIndex);
                                 IsGorilla = true;
+                                player_main_material = null;
                             }
                             else
                             {
+                                player_main_material = null;
                                 PlayerModelController.UnloadModel(assignedIndex);
 
                                 while (playermodel == null)
                                 {
                                     PlayerModelController.LoadModel(playerIndex);
                                     playermodel = GameObject.Find("playermodel.body");
+                                    
                                 }
                                 assignedIndex = playerIndex;
+                                Debug.Log(player_main_material.name);
                                 
+
                             }
 
-
-                        }
-
-                        
+                        }    
                     }
                 }
                 else
                 {
-
+                    SelectButton.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
                     selectflag = true;
                 }
 
-
-
-
-                //
-
-
-
-
                 if (LeftButton.GetComponent<ButtonTrigger>().pressed == true)
                 {
+                    
+                    LeftButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
                     if (leftflag == true)
                     {
                         leftflag = false;
@@ -296,17 +333,20 @@ namespace PlayerModel
                             playerIndex = fileName.Length - 1;//10 items but starts from 0 so 0 to 9 = 10 items
                         }
 
-
+                        PlayerModelController.PreviewModel(playerIndex);
                         
                     }
                 }
                 else
                 {
+                    LeftButton.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
                     leftflag = true;
                 }
-
+                
                 if (RightButton.GetComponent<ButtonTrigger>().pressed == true)
                 {
+                    
+                    RightButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
                     if (rightflag == true)
                     {
                         rightflag = false;
@@ -316,48 +356,31 @@ namespace PlayerModel
                             playerIndex = 0;
                         }
 
+                        PlayerModelController.PreviewModel(playerIndex);
 
-                        
                     }
                 }
                 else
                 {
+                    RightButton.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
                     rightflag = true;
                 }
+
+
+                //preview materials buttons
+
+                for(int i=0; i < misc_orbs.Length; i++)
+                {
+                    if(misc_orbs[i].GetComponent<ButtonTrigger>().pressed == true)
+                    {
+                        PlayerModelController.player_preview.GetComponent<MeshRenderer>().material = mat_preview[i];
+                    }
+                }
+                 //hi <3
             }
+
         }//fixedupdate
 
 
-        /* This attribute tells Utilla to call this method when a modded room is joined */
-        [ModdedGamemodeJoin]
-        public void OnJoin(string gamemode)
-        {
-            /* Activate your mod here */
-            /* This code will run regardless of if the mod is enabled*/
-
-            
-    
-
-        }
-
-        /* This attribute tells Utilla to call this method when a modded room is left */
-        [ModdedGamemodeLeave]
-        public void OnLeave(string gamemode)
-        {
-            /* Deactivate your mod here */
-            /* This code will run regardless of if the mod is enabled*/
-
-            
-        }
-
-        private void RoomJoined(object sender, Events.RoomJoinedArgs e)
-        {
-            Debug.Log($"Private room: {e.isPrivate}, Gamemode: {e.Gamemode}");
-        }
-
-        private void RoomLeft(object sender, Events.RoomJoinedArgs e)
-        {
-            Debug.Log($"Private room: {e.isPrivate}, Gamemode: {e.Gamemode}");
-        }
     }
 }

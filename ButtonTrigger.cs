@@ -4,36 +4,31 @@ using UnityEngine;
 
 public class ButtonTrigger : MonoBehaviour
 {
-    GameObject redButton;
+    static public GameObject button;
 
     public bool pressed = false;
 
-    public void InitButton(GameObject button_On)
+    static public void AssignButton(GameObject obj)
     {
-        redButton = button_On;
-        redButton.GetComponent<MeshRenderer>().enabled = false;
-        
+        button = obj;
+        button.layer = 18; //button layer
+        button.AddComponent<ButtonTrigger>();
+        var box = button.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+
     }
-	void OnTriggerEnter(Collider collider)
+
+    void OnTriggerEnter(Collider collider)
     {
-        redButton.GetComponent<MeshRenderer>().enabled = true;
-        
         pressed = true;
+
+
     }
 
     void OnTriggerExit(Collider collider)
-    {
-        redButton.GetComponent<MeshRenderer>().enabled = false;
-        
+    { 
         pressed = false;
     }
 
-    static public void AssignButton(GameObject button, GameObject button_on)
-    {
-        button.layer = 18; //button layer
-        button_on.transform.SetParent(button.transform, true);
-        button.AddComponent<ButtonTrigger>();
-        button.GetComponent<ButtonTrigger>().InitButton(button_on);
-    }
-
+    
 }

@@ -61,8 +61,8 @@ namespace showgorilla
             gorillachest.GetComponent<Renderer>().forceRenderingOff = false;
 
         }
-        static Vector4 gorillacolor;
-        static Vector4 last_gorillacolor;
+        static Color gorillacolor;
+        
         static public bool flag1 = true;
         static public GameObject gorillabody;
         static public Renderer rendGorilla;
@@ -75,85 +75,50 @@ namespace showgorilla
             //Debug.Log(gorillabody.name);
             rendGorilla = gorillabody.GetComponent<Renderer>();
             gorillacolor = rendGorilla.material.color;
+            
+            playermodel.GetComponent<SkinnedMeshRenderer>().material.SetColor("_Color", gorillacolor);
 
-            
-            
-            
-            
-            playermodel.GetComponent<SkinnedMeshRenderer>().material.SetVector("_Color", gorillacolor);
-            last_gorillacolor = gorillacolor;
-            
-            
-            
-            
+        }
 
-            
-            if (last_gorillacolor != gorillacolor)
-            {
-                last_gorillacolor = gorillacolor;
-                
-                last_gorillacolor = gorillacolor;
-                playermodel.GetComponent<SkinnedMeshRenderer>().material.SetVector("_Color", gorillacolor);
-                
-            }
-
-
+        static public void ResetMaterial(GameObject playermodel)
+        {
+            playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
         }
         static public void AssignMaterial(GameObject clone_body, GameObject playermodel)
         {
             if(clone_body != null && playermodel != null)
             {
+
                 if (clone_body.GetComponent<Renderer>().material.name == "infected (Instance)")
                 {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_lava_prop", 1);
-                }
-                else
+                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[1];
+                }else if (clone_body.GetComponent<Renderer>().material.name == "It (Instance)")
                 {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_lava_prop", 0);
-                }
-                // rock stones material assign
-                if (clone_body.GetComponent<Renderer>().material.name == "It (Instance)")
+                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[2];
+                }else if (clone_body.GetComponent<Renderer>().material.name == "ice (Instance)")
                 {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_rock_prop", 1);
-                }
-                else
+                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[3];
+                }else
                 {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_rock_prop", 0);
+                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
                 }
-                // ice material assign
-                if (clone_body.GetComponent<Renderer>().material.name == "ice (Instance)")
-                {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_ice_prop", 1);
-                }
-                else
-                {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_ice_prop", 0);
-                }
+               
             }
             else
             {
                 if(clone_body == null)
                 {
-                    Debug.Log("clone_body is null");
+                    Debug.LogError("clone_body is null");
                 }
                 if(playermodel == null)
                 {
-                    Debug.Log("playermodel is null");
+                    Debug.LogError("playermodel is null");
                 }
                 
             }
            
         }
 
-        static public void ResetMaterial(GameObject playermodel)
-        {
-            if(playermodel != null)
-            {
-                playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_lava_prop", 0);
-                playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_rock_prop", 0);
-                playermodel.GetComponent<SkinnedMeshRenderer>().material.SetInt("_ice_prop", 0);
-            }
-            
-        }
+        
     }
 }
