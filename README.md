@@ -1,4 +1,4 @@
-# PlayerModelMod
+# PlayerModelMod V1.0.0
 Requires Utilla
 
 FastIKFabric.cs by https://github.com/ditzel/SimpleIK
