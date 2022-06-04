@@ -3,9 +3,16 @@ Requires Utilla
 
 FastIKFabric.cs by https://github.com/ditzel/SimpleIK
 
-Install it using MonkeModManager here:
+Install Utilla using MonkeModManager here:
 
 https://github.com/DeadlyKitten/MonkeModManager/releases/tag/1.3.0
+
+Installation:
+
+- Open PlayerModel.zip
+- Drag PlayerModel Folder into your Plugins Folder
+- Open the new PlayerModel folder, there should be PlayerModel.dll and PlayerAssets folder inside
+- D O N E
 
 ![PlayerModelMod_GorillaTag](https://user-images.githubusercontent.com/65086429/169942239-7da8eb2f-0778-4b7c-a218-f81a72f307e8.png ) 
 
