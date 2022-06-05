@@ -5,7 +5,7 @@ FastIKFabric.cs by https://github.com/ditzel/SimpleIK
 
 Install Utilla using MonkeModManager here:
 
-https://github.com/DeadlyKitten/MonkeModManager/releases/tag/1.3.0
+https://github.com/DeadlyKitten/MonkeModManager/releases
 
 Installation:
 
