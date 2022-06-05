@@ -14,7 +14,8 @@ Installation:
 - Open the new PlayerModel folder, there should be PlayerModel.dll and PlayerAssets folder inside
 - D O N E
 
-![PlayerModelMod_GorillaTag](https://user-images.githubusercontent.com/65086429/169942239-7da8eb2f-0778-4b7c-a218-f81a72f307e8.png ) 
+![43teryertytetyehre](https://user-images.githubusercontent.com/65086429/172032297-e52cb4e3-c77b-4225-b3be-569fbfb03a2a.png)
+
 
 Custom player mod for Gorilla Tag
 This Mod allows you to change Player models!!
