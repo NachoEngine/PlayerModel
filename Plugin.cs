@@ -7,7 +7,7 @@ using System.IO;
 using Photon.Pun;
 using showgorilla;
 using UnityEngine.UI;
-
+using UnityEngine.InputSystem;
 
 namespace PlayerModel
 {
@@ -49,6 +49,7 @@ namespace PlayerModel
 
         void OnGameInitialized(object sender, EventArgs e)
         {
+            Debug.Log("NachoEngine PlayerModel Mod V1.0.2");
             rootPath = Directory.GetCurrentDirectory();
 
             playerpath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", "PlayerAssets");
@@ -176,12 +177,55 @@ namespace PlayerModel
         public bool STARTPLAYERMOD = false;
         public int assignedIndex = 0;// index of array, 
 
+        float nextpress;
+        float nextpress1;
+        float nextpress2;
+        float cooldown = 1;
+        
+
         void FixedUpdate()
         {
-           
+            
+            if (Keyboard.current.spaceKey.wasPressedThisFrame  && Time.time > nextpress)
+            {
+                nextpress = Time.time + cooldown;
+                //Debug.Log("###########################################selected");
+                SelectButton.GetComponent<ButtonTrigger>().pressed = true;
+            }
+            else if(Keyboard.current.spaceKey.wasReleasedThisFrame)
+            {
+                SelectButton.GetComponent<ButtonTrigger>().pressed = false;
+            }
+
+
+
+
+            if (Keyboard.current.aKey.wasPressedThisFrame && Time.time > nextpress1)
+            {
+                nextpress1 = Time.time + cooldown;
+                //Debug.Log("#############################################leftpage");
+                LeftButton.GetComponent<ButtonTrigger>().pressed = true;
+            }
+            else if(Keyboard.current.aKey.wasReleasedThisFrame)
+            {
+                LeftButton.GetComponent<ButtonTrigger>().pressed = false;
+            }
+            if (Keyboard.current.dKey.wasPressedThisFrame && Time.time > nextpress2)
+            {
+                nextpress2 = Time.time + cooldown;
+                //Debug.Log("###########################################rightpage");
+                RightButton.GetComponent<ButtonTrigger>().pressed = true;
+            }
+            else if (Keyboard.current.dKey.wasReleasedThisFrame)
+            {
+                RightButton.GetComponent<ButtonTrigger>().pressed = false;
+            }
+            
+
             if (STARTPLAYERMOD == true)
             {
                 
+
                 if (PhotonNetwork.InRoom)
                 {
                     if (IsGorilla == true)//in a room, is gorilla model
@@ -249,14 +293,31 @@ namespace PlayerModel
                     }
                     else//not in a room, is playermodel
                     {
-                        Showgorilla.ResetMaterial(playermodel);
-                        Showgorilla.HideOfflineRig();
-                        if (PlayerModelController.CustomColors)
+                        playermodel = GameObject.Find("playermodel.body");
+                        if (playermodel != null)
                         {
-
-                            Showgorilla.AssignColor(playermodel);
+                            Showgorilla.ResetMaterial(playermodel);
+                            Showgorilla.HideOfflineRig();
+                            if (PlayerModelController.CustomColors)
+                            {
+                                Showgorilla.AssignColor(playermodel);
+                            }
                         }
-                        
+                        else
+                        {
+                            
+                            while (playermodel == null)
+                            {
+                                Debug.Log("switching playermodel = "+ playerIndex);
+                                PlayerModelController.LoadModel(playerIndex);
+                                playermodel = GameObject.Find("playermodel.body");
+
+                            }
+                            assignedIndex = playerIndex;
+                            IsGorilla = false;
+                            Debug.Log("switching playermodel");
+                            PlayerModelController.AssignModel();
+                        }
                     }
 
                 }
@@ -268,15 +329,18 @@ namespace PlayerModel
                         Destroy(GameObject.Find("nachoengine_playermodelmod"));
                         nachotext = true;
                     }
+
                     SelectButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
+
                     if (selectflag == true)
                     {
                         selectflag = false;
+                        Debug.Log("###########################################select");
                         if (IsGorilla == true)//switching from gorilla to playermodel
                         {
                             while (playermodel == null)
                             {
-                                Debug.Log("Gorilla to player model loading");
+                                Debug.Log("Gorilla to playermodel");
                                 PlayerModelController.LoadModel(playerIndex);
                                 playermodel = GameObject.Find("playermodel.body");
                                 
@@ -286,29 +350,21 @@ namespace PlayerModel
                             Debug.Log("Gorilla to player model loaded");
                             PlayerModelController.AssignModel();
                         }
-                        else//model to model
+                        else 
                         {
-                            if (assignedIndex == playerIndex)
+                            if (assignedIndex == playerIndex)//playermodel to gorilla 
                             {
-                                PlayerModelController.UnloadModel(assignedIndex);
+                                PlayerModelController.UnloadModel();
                                 IsGorilla = true;
                                 player_main_material = null;
                             }
-                            else
+                            else//playermodel to playermodel
                             {
+                                PlayerModelController.UnloadModel();
+                                IsGorilla = false;
                                 player_main_material = null;
-                                PlayerModelController.UnloadModel(assignedIndex);
-
-                                while (playermodel == null)
-                                {
-                                    PlayerModelController.LoadModel(playerIndex);
-                                    playermodel = GameObject.Find("playermodel.body");
-                                    
-                                }
                                 assignedIndex = playerIndex;
-                                Debug.Log(player_main_material.name);
                                 
-
                             }
 
                         }    
@@ -326,11 +382,13 @@ namespace PlayerModel
                     LeftButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
                     if (leftflag == true)
                     {
+                        Debug.Log("###########################################leftpage");
                         leftflag = false;
                         playerIndex--;
+                        Debug.Log("playerindex = " + playerIndex);
                         if (playerIndex < 0)
                         {
-                            playerIndex = fileName.Length - 1;//10 items but starts from 0 so 0 to 9 = 10 items
+                            playerIndex = fileName.Length-1;//10 items but starts from 0 so 0 to 9 = 10 items
                         }
 
                         PlayerModelController.PreviewModel(playerIndex);
@@ -349,9 +407,11 @@ namespace PlayerModel
                     RightButton.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
                     if (rightflag == true)
                     {
+                        Debug.Log("###########################################rightpage");
                         rightflag = false;
                         playerIndex++;
-                        if (playerIndex > fileName.Length - 1)
+                        Debug.Log("playerindex = " + playerIndex);
+                        if (playerIndex > fileName.Length-1)
                         {
                             playerIndex = 0;
                         }

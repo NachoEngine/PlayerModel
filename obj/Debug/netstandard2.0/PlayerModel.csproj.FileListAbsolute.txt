@@ -170,6 +170,7 @@ C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Deb
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.Burst.Unsafe.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.InputSystem.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.Mathematics.dll
+C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.TextMeshPro.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.Timeline.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\Unity.XR.Interaction.Toolkit.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\bin\Debug\netstandard2.0\UnityEngine.AccessibilityModule.dll
@@ -251,3 +252,4 @@ C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\obj\Deb
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\obj\Debug\netstandard2.0\PlayerModel.csproj.CopyComplete
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\obj\Debug\netstandard2.0\PlayerModel.dll
 C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\obj\Debug\netstandard2.0\PlayerModel.pdb
+C:\Users\Isedro\HobbyProjectFolder\programming\GorillaTagMod_PlayerModel\obj\Debug\netstandard2.0\PlayerModel.csproj.AssemblyReference.cache

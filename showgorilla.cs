@@ -83,6 +83,11 @@ namespace showgorilla
         static public void ResetMaterial(GameObject playermodel)
         {
             playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
+            
+            var pmat = playermodel.GetComponent<SkinnedMeshRenderer>().material;
+            var mmat = PlayerModel.Plugin.player_main_material;
+
+            
         }
         static public void AssignMaterial(GameObject clone_body, GameObject playermodel)
         {

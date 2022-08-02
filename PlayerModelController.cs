@@ -55,9 +55,9 @@ public class PlayerModelController : MonoBehaviour
                 playermodel_author = player_info[1];
 
                 Debug.Log(player_info_stream);
-                // easy code really
-                player_body = parentAsset.transform.GetChild(0).gameObject.transform.Find("playermodel.body").gameObject;
                 
+                player_body = parentAsset.transform.GetChild(0).gameObject.transform.Find("playermodel.body").gameObject;
+                Debug.Log("found playermodel.body");
                 List<Material> material_list = player_body.GetComponent<SkinnedMeshRenderer>().materials.ToList();
                 
                 Material[] material_array = material_list.ToArray();
@@ -93,7 +93,7 @@ public class PlayerModelController : MonoBehaviour
     static public GameObject player_body;
 
 
-    static public void UnloadModel(int index)
+    static public void UnloadModel()
     {
         GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
         GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
@@ -123,6 +123,8 @@ public class PlayerModelController : MonoBehaviour
             Destroy(HandRight);
             Destroy(headbone);
             Destroy(playermodel);
+
+            Debug.Log("playermodel unloaded");
         }
         else
         {
@@ -151,7 +153,7 @@ public class PlayerModelController : MonoBehaviour
         AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
         if(playerbundle != null)
         {
-            GameObject assetplayer = playerbundle.LoadAsset<GameObject>("playermodel.ParentObject");//this breaks your code dev all player bundle is the same name
+            GameObject assetplayer = playerbundle.LoadAsset<GameObject>("playermodel.ParentObject");
             if(assetplayer != null)
             {
                 var parentAsset = Instantiate(assetplayer);
@@ -183,7 +185,7 @@ public class PlayerModelController : MonoBehaviour
                 headtarget = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/head");
 
                 PlayerModel.Plugin.player_main_material = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().material; //saves playermodel material
-
+                Debug.Log("playermodel loaded");
 
             }
         }
@@ -268,6 +270,8 @@ public class PlayerModelController : MonoBehaviour
         headoffset = headtarget.transform.localRotation;
         headbone.transform.SetParent(headtarget.transform, true);
         headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
+
+        Debug.Log("assigned playermodel");
 
     }
 }
