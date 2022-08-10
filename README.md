@@ -1,25 +1,24 @@
 # PlayerModelMod
 
-Custom player mod for Gorilla Tag
+Custom player PC mod for Gorilla Tag
 
 This Mod allows you to change Player models!!
 
+![43teryertytetyehre](https://user-images.githubusercontent.com/65086429/172032297-e52cb4e3-c77b-4225-b3be-569fbfb03a2a.png)
+
 FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 
-Requires Utilla
-Install Utilla using MonkeModManager here:
+## Requirements:
+Utilla:
 
-https://github.com/DeadlyKitten/MonkeModManager/releases
+## Installation:
 
-Installation:
-
-- Open PlayerModel.zip
-- Drag PlayerModel Folder into your Plugins Folder
+- This mod requries Utilla, https://github.com/legoandmars/Utilla/releases, extract it into the Plugins folder
+- Download the latest release of this mod and extract it into the Plugins folder
 - Open the new PlayerModel folder, there should be PlayerModel.dll and PlayerAssets folder inside
 - D O N E
 
-![43teryertytetyehre](https://user-images.githubusercontent.com/65086429/172032297-e52cb4e3-c77b-4225-b3be-569fbfb03a2a.png)
-
+## PlayerModel Creators 
 
 If you want to make your own playermodels:
 https://github.com/NachoEngine/GorillaPlayerModelModProject-Master
