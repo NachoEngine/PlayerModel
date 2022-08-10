@@ -14,7 +14,9 @@ FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 - Download the [latest release of this mod] and extract it into the Plugins folder
 - Open the new PlayerModel folder, there should be PlayerModel.dll and PlayerAssets folder inside
 - D O N E
+
 [latest release of this mod]: https://github.com/NachoEngine/PlayerModelMod/releases
+
 ## PlayerModel Creators 
 
 If you want to make your own playermodels:
