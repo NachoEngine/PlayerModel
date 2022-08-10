@@ -19,26 +19,6 @@ Installation:
 
 Custom player mod for Gorilla Tag
 This Mod allows you to change Player models!!
-Includeds:
-- Lar Gibbon Credit Turbo Alligator
 
-https://www.youtube.com/watch?v=2blEs3iIGoM
-
-
-- Siamang Gibbon Credit Turbo Alligator
-
-https://www.youtube.com/watch?v=cAkejGRpk9I
-
-
-- The Chimp Credit TroutVR
-
-https://www.youtube.com/c/TroutVR
-
-
-- Baboon Credit GeobyteVR
-
-https://www.youtube.com/c/GigTheToobbie
-
-
-- Beautiful Boy Credit Antoca
-
+If you want to make your own playermodels:
+https://github.com/NachoEngine/GorillaPlayerModelModProject-Master
