@@ -6,7 +6,7 @@ This Mod allows you to change Player models!!
 
 Requires Utilla
 
-FastIKFabric.cs by https://github.com/ditzel/SimpleIK
+FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 
 Install Utilla using MonkeModManager here:
 
