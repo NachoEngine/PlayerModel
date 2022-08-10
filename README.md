@@ -4,10 +4,9 @@ Custom player mod for Gorilla Tag
 
 This Mod allows you to change Player models!!
 
-Requires Utilla
-
 FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 
+Requires Utilla
 Install Utilla using MonkeModManager here:
 
 https://github.com/DeadlyKitten/MonkeModManager/releases
