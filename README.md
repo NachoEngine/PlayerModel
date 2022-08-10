@@ -8,9 +8,6 @@ This Mod allows you to change Player models!!
 
 FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 
-## Requirements:
-Utilla:
-
 ## Installation:
 
 - This mod requries Utilla, https://github.com/legoandmars/Utilla/releases, extract it into the Plugins folder
