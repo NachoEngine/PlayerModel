@@ -1,7 +1,4 @@
-﻿#if UNITY_EDITOR
-using UnityEditor;
-#endif
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DitzelGames.FastIK
 {
@@ -77,6 +74,7 @@ namespace DitzelGames.FastIK
             if (Target == null)
             {
                 Target = new GameObject(gameObject.name + " Target").transform;// + " Target"
+                DontDestroyOnLoad(Target);
                 SetPositionRootSpace(Target, GetPositionRootSpace(transform));
             }
             StartRotationTarget = GetRotationRootSpace(Target);

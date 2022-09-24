@@ -5,17 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\misc" />
+    <Compile Remove="Patches\**" />
+    <EmbeddedResource Remove="Patches\**" />
+    <None Remove="Patches\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Assets\playerbundle" />
     <None Remove="Assets\playerbundle.manifest" />
+    <None Remove="Assets\PlayerModelStand" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\misc" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Patches\" />
+    <EmbeddedResource Include="Assets\PlayerModelStand" />
   </ItemGroup>
 
   <ItemGroup>
