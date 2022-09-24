@@ -15,12 +15,15 @@ namespace PlayerModel.Player
                 if (!PhotonNetwork.InRoom)
                     return;
 
-                if (serverGameObject == null)
-                    return;
+                GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
+                GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+                GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
 
-                serverGameObject.transform.GetChild(0).Find("gorilla").GetComponent<SkinnedMeshRenderer>().forceRenderingOff = !setTo;
-                serverGameObject.transform.GetChild(0).Find("rig/body/gorillachest").GetComponent<Renderer>().forceRenderingOff = !setTo;
-                serverGameObject.transform.GetChild(0).Find("rig/body/head/gorillaface").GetComponent<Renderer>().forceRenderingOff = !setTo;
+                clone_face.GetComponent<MeshRenderer>().forceRenderingOff = !setTo;
+                clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = !setTo;
+                clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = !setTo;
+
+                //bru
                 return;
             }
 

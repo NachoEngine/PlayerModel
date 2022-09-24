@@ -45,7 +45,6 @@ namespace PlayerModel
 
         IEnumerator StartPlayerModel()
         {
-            PlayerModelAppearance.serverGameObject = GameObject.Find("\"Global/GorillaParent/GorillaVRRigs");
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface"));
