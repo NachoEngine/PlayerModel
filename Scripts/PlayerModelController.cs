@@ -176,7 +176,7 @@ namespace PlayerModel.Player
 
         static public void AssignModel()
         {
-            GameObject left_finger = GameObject.Find("playermodel.left_finger");
+            /*GameObject left_finger = GameObject.Find("playermodel.left_finger");
             GameObject right_finger = GameObject.Find("playermodel.right_finger");
 
             if (left_finger != null && right_finger != null)
@@ -188,7 +188,7 @@ namespace PlayerModel.Player
 
                 GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
                 GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
-            }
+            }*/
 
             GameObject hand_l = GameObject.Find("hand.L");
             GameObject hand_r = GameObject.Find("hand.R");
@@ -252,9 +252,6 @@ namespace PlayerModel.Player
             headoffset = headtarget.transform.localRotation;
             headbone.transform.SetParent(headtarget.transform, true);
             headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
-
-            DontDestroyOnLoad(lefthandpos);
-            DontDestroyOnLoad(righthandpos);
 
         }
 

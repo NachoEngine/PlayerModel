@@ -8,36 +8,55 @@ namespace PlayerModel.Player
     {
         public static List<GameObject> playerGameObjects = new List<GameObject>();
         public static GameObject serverGameObject;
-        public static void SetRigRenderering(bool setTo, bool online)
+
+        static public void ShowOnlineRig()
         {
-            if (online)
-            {
-                if (!PhotonNetwork.InRoom)
-                    return;
+            GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
+            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
 
-                GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
-                GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-                GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
+            clone_face.GetComponent<MeshRenderer>().forceRenderingOff = false;
+            clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = false;
+            clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = false;
+        }
 
-                clone_face.GetComponent<MeshRenderer>().forceRenderingOff = !setTo;
-                clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = !setTo;
-                clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = !setTo;
+        static public void HideOnlineRig()
+        {
+            GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
+            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
 
-                //bru
-                return;
-            }
+            clone_face.GetComponent<MeshRenderer>().forceRenderingOff = true;
+            clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
+            clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = true;
+        }
 
-            if (playerGameObjects.Count == 0)
-                return;
+        static public void HideOfflineRig()
+        {
+            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            gorillaface.GetComponent<Renderer>().forceRenderingOff = true; // turns model off
 
-            foreach(GameObject playerObject in playerGameObjects)
-            {
-                if (playerObject.GetComponent<SkinnedMeshRenderer>() != null)
-                    playerObject.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = !setTo;
+            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
 
-                if (playerObject.GetComponent<Renderer>() != null)
-                    playerObject.GetComponent<Renderer>().forceRenderingOff = !setTo;
-            }
+            /*GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            gorillachest.GetComponent<Renderer>().material = mat_;
+            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
+*/
+        }
+
+        static public void ShowOfflineRig()
+        {
+            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            gorillaface.GetComponent<Renderer>().forceRenderingOff = false; // turns model on
+
+            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = false;
+
+            /*GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            gorillachest.GetComponent<Renderer>().material = mat_;
+            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
+*/
         }
 
 

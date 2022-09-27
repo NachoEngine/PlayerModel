@@ -37,9 +37,31 @@ namespace PlayerModel
         public static string[] page;
         public static List<Material> materials = new List<Material>();
         public static Material defMat;
-
+        public static Material matalpha;
+        public static Material chestmat;
+        GameObject gorillachest;
+        
         void OnGameInitialized(object sender, EventArgs e)
         {
+            gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest");
+            
+
+            matalpha = new Material(Shader.Find("Standard"));
+            matalpha.SetColor("_Color", new Color(1, 0, 0, 0.0f));
+            matalpha.SetFloat("_Mode", 3);
+            matalpha.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            matalpha.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            matalpha.EnableKeyword("_ALPHABLEND_ON");
+            matalpha.renderQueue = 3000;
+
+
+
+            //GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            /*GameObject gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
+            
+            gorillachest.GetComponent<Renderer>().material = Plugin.matalpha;
+            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
+            */
             StartCoroutine(StartPlayerModel());
         }
 
@@ -69,8 +91,6 @@ namespace PlayerModel
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=18niPks_72vsBnIbaWpvT4iwD7YA7nyoA", playerpath + @"\character stump.gtmodel");
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1tz41u9au0TxWjRFQ5sYAqp2rnoIaTmP4", playerpath + @"\Kyle The Robot.gtmodel");
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1niqY3Rnz0VPAwNYE4gtEaGwaRGqWtTGJ", playerpath + @"\Lar Gibbon.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1qlSpAT8L8qdt684TDDEYszG18uUVYNYp", playerpath + @"\Noob.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1C6vybxwFJ7IGu6NMO7rTnnXLg_dgh3hB", playerpath + @"\Proboscis Monke.gtmodel");
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1aXc6nbGFQnA7R8F64LUUthhDEToLP5qF", playerpath + @"\Siamang Gibbon.gtmodel");
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=12L-F8T_AIG8xzpdgfZ_5H0UmOOHOljoU", playerpath + @"\The Ape.gtmodel");
                 webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1izFz5mBLcNWUn4oq7qaPup9_CzlTRUhC", playerpath + @"\The Chimp.gtmodel");
@@ -261,7 +281,17 @@ namespace PlayerModel
         }
 
         public float currentTime = 0;
-
+        
+        public void hidechest()
+        {
+            gorillachest.GetComponent<Renderer>().material = matalpha;
+            Debug.Log("material set to alpha");
+        }
+        public void showchest()
+        {
+            gorillachest.GetComponent<Renderer>().material = chestmat;
+            Debug.Log("material set to gorilla");
+        }
         public void Update()
         {
             if (Time.time < currentTime)
@@ -278,6 +308,9 @@ namespace PlayerModel
         public void FixedUpdate()
         {
             
+            if (!STARTPLAYERMOD)
+                return;
+
             if (Keyboard.current.jKey.wasPressedThisFrame)
                 SelectButton.GetComponent<PlayerModelButton>().Press();
 
@@ -287,88 +320,88 @@ namespace PlayerModel
             if (Keyboard.current.kKey.wasPressedThisFrame)
                 RightButton.GetComponent<PlayerModelButton>().Press();
 
-            if (STARTPLAYERMOD == true)
+            PlayerModelController.rotationY -= 0.5f;
+            //Debug.Log(IsGorilla);
+            if (PhotonNetwork.InRoom)
             {
-                PlayerModelController.rotationY -= 0.5f;
-
-                if (PhotonNetwork.InRoom)
+                if (IsGorilla == true)//in a room, is gorilla model
                 {
-                    if (IsGorilla == true)//in a room, is gorilla model
-                    {
-                        
-                        flag_inroom = true;
-                        PlayerModelAppearance.flag1 = true;
-
-                        PlayerModelAppearance.SetRigRenderering(true, true);
-                        PlayerModelAppearance.SetRigRenderering(true, false);
-
-                        clone_body = null;
-                    }
-                    else//in a room, is playermodel
-                    {
-                        if (clone_body != null && playermodel != null)
-                        {
-
-                            PlayerModelAppearance.SetRigRenderering(false, true);
-                            PlayerModelAppearance.SetRigRenderering(false, false);
-
-                            if (PlayerModelController.CustomColors)
-                                PlayerModelAppearance.AssignColor(playermodel);
-
-                            if (PlayerModelController.GameModeTextures)
-                                PlayerModelAppearance.AssignMaterial(clone_body, playermodel);
-                        }
-
-                        if (clone_body == null)
-                            clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-
-                        if (playermodel == null)
-                        {
-                            while (playermodel == null)
-                            {
-                                PlayerModelController.LoadModel(assignedIndex);
-                                playermodel = GameObject.Find("playermodel.body");
-                                PlayerModelController.AssignModel();
-                            }
-                        }
-                    }
-                }
-                else if (!PhotonNetwork.InRoom)
-                {
-
-                    flag_inroom = false;
+                    PlayerModelAppearance.ShowOnlineRig();
+                    PlayerModelAppearance.ShowOfflineRig();
+                    showchest();
+                    flag_inroom = true;
+                    PlayerModelAppearance.flag1 = true;
+                    
                     clone_body = null;
-                    if (IsGorilla == true)//not in a room, is gorilla model
+                }
+                else//in a room, is playermodel
+                {
+                    if (clone_body != null && playermodel != null)
                     {
-                        PlayerModelAppearance.flag1 = true;
-                        PlayerModelAppearance.SetRigRenderering(true, false);
+                        PlayerModelAppearance.HideOnlineRig();
+                        PlayerModelAppearance.HideOfflineRig();
+                        hidechest();
 
+                        if (PlayerModelController.CustomColors)
+                            PlayerModelAppearance.AssignColor(playermodel);
+
+                        if (PlayerModelController.GameModeTextures)
+                            PlayerModelAppearance.AssignMaterial(clone_body, playermodel);
                     }
-                    else//not in a room, is playermodel
-                    {
-                        playermodel = GameObject.Find("playermodel.body");
-                        if (playermodel != null)
-                        {
-                            PlayerModelAppearance.ResetMaterial(playermodel);
-                            PlayerModelAppearance.SetRigRenderering(false, false);
-                            if (PlayerModelController.CustomColors)
-                                PlayerModelAppearance.AssignColor(playermodel);
-                        }
-                        else
-                        {
-                            while (playermodel == null)
-                            {
-                                PlayerModelController.LoadModel(playerIndex);
-                                playermodel = GameObject.Find("playermodel.body");
 
-                            }
-                            assignedIndex = playerIndex;
-                            IsGorilla = false;
+                    if (clone_body == null)
+                        clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+
+                    if (playermodel == null)
+                    {
+                        while (playermodel == null)
+                        {
+                            PlayerModelController.LoadModel(assignedIndex);
+                            playermodel = GameObject.Find("playermodel.body");
                             PlayerModelController.AssignModel();
                         }
                     }
-
                 }
+            }
+            else if (!PhotonNetwork.InRoom)
+            {
+                Debug.Log("test");
+                flag_inroom = false;
+                clone_body = null;
+                if (IsGorilla == true)//not in a room, is gorilla model
+                {
+                    
+                    PlayerModelAppearance.flag1 = true;
+                    PlayerModelAppearance.ShowOfflineRig();
+                    showchest();
+                }
+                else//not in a room, is playermodel
+                {
+                    playermodel = GameObject.Find("playermodel.body");
+                    if (playermodel != null)
+                    {
+                        PlayerModelAppearance.ResetMaterial(playermodel);
+                        PlayerModelAppearance.HideOfflineRig();
+                        hidechest();
+                        
+
+                        if (PlayerModelController.CustomColors)
+                            PlayerModelAppearance.AssignColor(playermodel);
+                    }
+                    else
+                    {
+                        while (playermodel == null)
+                        {
+                            PlayerModelController.LoadModel(playerIndex);
+                            playermodel = GameObject.Find("playermodel.body");
+
+                        }
+                        assignedIndex = playerIndex;
+                        IsGorilla = false;
+                        PlayerModelController.AssignModel();
+                    }
+                }
+
             }
 
         }//fixedupdate
