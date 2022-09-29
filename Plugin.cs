@@ -43,25 +43,20 @@ namespace PlayerModel
         
         void OnGameInitialized(object sender, EventArgs e)
         {
+            //forcerenderingoff or switching to transparent material breaks the mod
+            //this sets gorillachest standard material to transparent mode
+            //uses the alpha channel to hide the gorillachest when selecting a playermodel
+            
             gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest");
-            
+            chestmat = gorillachest.GetComponent<Renderer>().material;
+            Debug.Log("ChestMaterial Shader:  " + chestmat.shader.name);
+            chestmat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
+            chestmat.SetFloat("_Mode", 3);
+            chestmat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            chestmat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            chestmat.EnableKeyword("_ALPHABLEND_ON");
+            chestmat.renderQueue = 3000;
 
-            matalpha = new Material(Shader.Find("Standard"));
-            matalpha.SetColor("_Color", new Color(1, 0, 0, 0.0f));
-            matalpha.SetFloat("_Mode", 3);
-            matalpha.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            matalpha.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            matalpha.EnableKeyword("_ALPHABLEND_ON");
-            matalpha.renderQueue = 3000;
-
-
-
-            //GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
-            /*GameObject gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
-            
-            gorillachest.GetComponent<Renderer>().material = Plugin.matalpha;
-            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
-            */
             StartCoroutine(StartPlayerModel());
         }
 
@@ -284,13 +279,13 @@ namespace PlayerModel
         
         public void hidechest()
         {
-            gorillachest.GetComponent<Renderer>().material = matalpha;
-            Debug.Log("material set to alpha");
+            chestmat.SetColor("_Color", new Color(1, 1, 1, 0.0f));
+            //Debug.Log("material set to alpha");
         }
         public void showchest()
         {
-            gorillachest.GetComponent<Renderer>().material = chestmat;
-            Debug.Log("material set to gorilla");
+            chestmat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
+            //Debug.Log("material set to gorilla");
         }
         public void Update()
         {
@@ -365,7 +360,7 @@ namespace PlayerModel
             }
             else if (!PhotonNetwork.InRoom)
             {
-                Debug.Log("test");
+                
                 flag_inroom = false;
                 clone_body = null;
                 if (IsGorilla == true)//not in a room, is gorilla model
