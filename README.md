@@ -12,7 +12,7 @@ FastIKFabric.cs by https://github.com/ditzel/SimpleIK (DON'T DOWNLOAD)
 
 - This mod requries Utilla, https://github.com/legoandmars/Utilla/releases, extract it into the Plugins folder
 - Download the [latest release of this mod] and extract it into the Plugins folder
-- Open the new PlayerModel folder, there should be PlayerModel.dll and PlayerAssets folder inside
+- All you need is PlayerModel.dll in your Plugins folder. The mod will generate a PlayerModel/PlayerAssets folder to store playermodel files in. (.gtmodel)
 - D O N E
 
 [latest release of this mod]: https://github.com/NachoEngine/PlayerModelMod/releases
