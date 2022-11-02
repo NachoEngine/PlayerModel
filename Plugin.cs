@@ -12,6 +12,9 @@ using UnityEngine.InputSystem;
 using PlayerModel.Player;
 using PlayerModel.Utils;
 using System.Net;
+using UnityEngine.XR;
+using System.Linq;
+
 
 namespace PlayerModel
 {
@@ -31,6 +34,7 @@ namespace PlayerModel
         }
 
         string rootPath;
+        public static string textSavePath;
         public static string playerpath;
         public static string[] files;
         public static string[] fileName;
@@ -49,17 +53,27 @@ namespace PlayerModel
             
             gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest");
             chestmat = gorillachest.GetComponent<Renderer>().material;
-            Debug.Log("ChestMaterial Shader:  " + chestmat.shader.name);
-            chestmat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
-            chestmat.SetFloat("_Mode", 3);
-            chestmat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            chestmat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            chestmat.EnableKeyword("_ALPHABLEND_ON");
-            chestmat.renderQueue = 3000;
+            //Debug.Log("ChestMaterial Shader:  " + chestmat.shader.name);
+            setmatalpha(chestmat);
+
+            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            setmatalpha(gorillaface.GetComponent<Renderer>().material);
+
+            
+
 
             StartCoroutine(StartPlayerModel());
         }
+        void setmatalpha(Material mat)
+        {
+            mat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
+            mat.SetFloat("_Mode", 3);
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.renderQueue = 3000;
 
+        }
         IEnumerator StartPlayerModel()
         {
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla"));
@@ -72,26 +86,41 @@ namespace PlayerModel
             rootPath = Directory.GetCurrentDirectory();
 
             playerpath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", "PlayerAssets");
-
+            textSavePath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", textfilename);
+            //preload gtmodels to PlayerAssets folder
             if (!Directory.Exists(playerpath))
             {
+                //stores list of all embeded files from dll
+                List<string> embededmodels = Assembly.GetExecutingAssembly().GetManifestResourceNames().ToList();
+
+                //removes not gtmodels from list
+                string type = ".gtmodel";
+                for(int i = 0; i <embededmodels.Count; i++)
+                {
+                    
+                    if (!embededmodels[i].EndsWith(type))
+                    {
+                        embededmodels.Remove(embededmodels[i]);
+                    }
+                }
+
                 Directory.CreateDirectory(playerpath);
-                yield return new WaitForSeconds(0.5f);
+                //stores embeded models to folder
+                foreach (String model in embededmodels)
+                {
+                    //Debug.Log(model);
 
-                WebClient webClient = new WebClient();
+                    string filename = model.Replace("PlayerModel.PlayerAssets.", "");
+                    MemoryStream ms = new MemoryStream();   // buffer for file bytes
+                    using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(model))  // open resource
+                    {
+                        stream.CopyTo(ms);   // copy to buffer
+                        byte[] bb = ms.ToArray();   // need array to save
+                        File.WriteAllBytes(playerpath + @"\" + filename, bb);   // save byte array to file
 
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=17VmQyBhn78ToCASyQ0dJHuoPoHPncyAi", playerpath + @"\Amogus.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1j2ny1ohnHkUoK-yqM7OZV-zt4ZGxuu66", playerpath + @"\Babbling Baboon.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1CFIPOZ11cqXAuXlt1np4l7j3kBTGtaXO", playerpath + @"\Beautifulboy.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=18niPks_72vsBnIbaWpvT4iwD7YA7nyoA", playerpath + @"\character stump.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1tz41u9au0TxWjRFQ5sYAqp2rnoIaTmP4", playerpath + @"\Kyle The Robot.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1niqY3Rnz0VPAwNYE4gtEaGwaRGqWtTGJ", playerpath + @"\Lar Gibbon.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1aXc6nbGFQnA7R8F64LUUthhDEToLP5qF", playerpath + @"\Siamang Gibbon.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=12L-F8T_AIG8xzpdgfZ_5H0UmOOHOljoU", playerpath + @"\The Ape.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1izFz5mBLcNWUn4oq7qaPup9_CzlTRUhC", playerpath + @"\The Chimp.gtmodel");
-                webClient.DownloadFile("https://drive.google.com/uc?export=download&id=1L2uTiElqeLRzC8zwFCjNRtMiO2Es14Np", playerpath + @"\Toon Gorilla.gtmodel");
-
-                yield return new WaitForSeconds(2f);
+                    }
+                }
+                
             }
 
             files = Directory.GetFiles(playerpath, "*.gtmodel");//cant Path.GetFileName - cant convert string[] to string
@@ -101,34 +130,38 @@ namespace PlayerModel
             for (int i = 0; i < fileName.Length; i++)
             {
                 fileName[i] = Path.GetFileName(files[i]); //getting file names from directories
-                Debug.Log(fileName[i]);
+                //Debug.Log(fileName[i]);
             }
-
-            Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlayerModel.Assets.PlayerModelStand");
+            //Debug.Log("Loading MISC");
+            Stream str = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlayerModel.Assets.playermodelstand");
             AssetBundle bundle = AssetBundle.LoadFromStream(str);
             GameObject asset = bundle.LoadAsset<GameObject>("misc");
             var localasset = Instantiate(asset);
 
             DontDestroyOnLoad(localasset);
-
+            //Debug.Log("MISC Loaded");
             GameObject misc = localasset.transform.GetChild(0).gameObject;
-
+            
             misc.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
             misc.transform.localRotation = Quaternion.Euler(0f, -60f, 0f);
-
+            //Debug.Log("MISC Child");
             SelectButton = misc.transform.Find("misc.selector").gameObject;
+            //Debug.Log("MISC selectbutton");
             SelectButton.AddComponent<PlayerModelButton>().button = 1;
-
+            //Debug.Log("MISC select add");
             RightButton = misc.transform.Find("misc.rightpage").gameObject;
             RightButton.AddComponent<PlayerModelButton>().button = 2;
 
             LeftButton = misc.transform.Find("misc.leftpage").gameObject;
             LeftButton.AddComponent<PlayerModelButton>().button = 3;
-
+            //Debug.Log("Buttons Loaded");
             GameObject canvasText = misc.transform.Find("Canvas").gameObject;
 
             GameObject modelText = canvasText.transform.Find("model.text").gameObject;
             GameObject authorText = canvasText.transform.Find("author.text").gameObject;
+            GameObject versionText = canvasText.transform.Find("version.text").gameObject;
+
+            versionText.GetComponent<Text>().text = "V" + PluginInfo.Version;
 
             model_text = modelText.GetComponent<Text>();
             author_text = authorText.GetComponent<Text>();
@@ -170,10 +203,55 @@ namespace PlayerModel
             right_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
 
             STARTPLAYERMOD = true;
-            PlayerModelController.PreviewModel(playerIndex);
+            
+            if (File.Exists(textSavePath))
+            {
+                string[] defaultdata = readFromText(textSavePath);
+
+                //Debug.Log("Checking Default PlayerModel Data");
+                //Debug.Log(defaultdata[1]);
+                if(defaultdata[1] == Convert.ToString(0))//If IsGorilla
+                {
+                    PlayerModelController.PreviewModel(Convert.ToInt32(defaultdata[0]));
+                    if (defaultdata[2] == model_text.text)//matching playermodel name
+                    {
+                        Debug.Log("Loading Default PlayerModel");
+                        playerIndex = Convert.ToInt32(defaultdata[0]);
+                        PlayerModelController.PreviewModel(playerIndex);
+                        IsGorilla = false;
+                    }
+                    
+                }else
+                {
+                    //Debug.Log("Loading as Gorilla");
+                    playerIndex = 0;
+                    PlayerModelController.PreviewModel(0);
+                    IsGorilla = true;
+                }
+
+            }
+            
             yield break;
         }
+        static string textfilename = "PlayerModelDefault.pmdefault";
+        static string split = ",";
+        public static void writeToText(int index_, int IsGorilla_, string name)
+        {
+            
+            string text = index_ + split + IsGorilla_ + split + name;
+            File.WriteAllText(textSavePath, text);
+        }
 
+        public static string[] readFromText(string path)
+        {
+            
+            string text = File.ReadAllText(textSavePath);
+            string[] strings = text.Split(',');
+            
+            
+            return strings;
+
+        }
         static public Material[] mat_preview;
         static public GameObject[] misc_orbs;
         static public int mat_index;
@@ -240,6 +318,8 @@ namespace PlayerModel
                             assignedIndex = playerIndex;
                         }
                     }
+                    //writeToText(assignedIndex, Convert.ToInt32(IsGorilla));
+                    writeToText(assignedIndex, Convert.ToInt32(IsGorilla), model_text.text);
 
                     break;
                 case 2:
@@ -287,6 +367,7 @@ namespace PlayerModel
             chestmat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
             //Debug.Log("material set to gorilla");
         }
+
         public void Update()
         {
             if (Time.time < currentTime)
@@ -299,7 +380,7 @@ namespace PlayerModel
             else
                 PlayerModelController.localPositionY = 1f;
         }
-        
+
         public void FixedUpdate()
         {
             
@@ -338,9 +419,10 @@ namespace PlayerModel
                         hidechest();
 
                         if (PlayerModelController.CustomColors)
-                            PlayerModelAppearance.AssignColor(playermodel);
+                            PlayerModelAppearance.AssignColor();
 
                         if (PlayerModelController.GameModeTextures)
+                            clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
                             PlayerModelAppearance.AssignMaterial(clone_body, playermodel);
                     }
 
@@ -375,15 +457,16 @@ namespace PlayerModel
                     playermodel = GameObject.Find("playermodel.body");
                     if (playermodel != null)
                     {
+                        
                         PlayerModelAppearance.ResetMaterial(playermodel);
                         PlayerModelAppearance.HideOfflineRig();
                         hidechest();
-                        
 
+                        
                         if (PlayerModelController.CustomColors)
-                            PlayerModelAppearance.AssignColor(playermodel);
+                            PlayerModelAppearance.AssignColor();
                     }
-                    else
+                    else //redundency
                     {
                         while (playermodel == null)
                         {
@@ -394,6 +477,7 @@ namespace PlayerModel
                         assignedIndex = playerIndex;
                         IsGorilla = false;
                         PlayerModelController.AssignModel();
+                        
                     }
                 }
 

@@ -13,11 +13,37 @@
   <ItemGroup>
     <None Remove="Assets\playerbundle" />
     <None Remove="Assets\playerbundle.manifest" />
-    <None Remove="Assets\PlayerModelStand" />
+    <None Remove="Assets\playermodelstand" />
+    <None Remove="PlayerAssets\Amogus.gtmodel" />
+    <None Remove="PlayerAssets\Babbling Baboon.gtmodel" />
+    <None Remove="PlayerAssets\Beautifulboy.gtmodel" />
+    <None Remove="PlayerAssets\character stump.gtmodel" />
+    <None Remove="PlayerAssets\HazmatGorilla.gtmodel" />
+    <None Remove="PlayerAssets\Kyle The Robot.gtmodel" />
+    <None Remove="PlayerAssets\Lar Gibbon.gtmodel" />
+    <None Remove="PlayerAssets\RobotMonke.gtmodel" />
+    <None Remove="PlayerAssets\Siamang Gibbon.gtmodel" />
+    <None Remove="PlayerAssets\Skeleton.gtmodel" />
+    <None Remove="PlayerAssets\The Ape.gtmodel" />
+    <None Remove="PlayerAssets\The Chimp.gtmodel" />
+    <None Remove="PlayerAssets\Toon Gorilla.gtmodel" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\PlayerModelStand" />
+    <EmbeddedResource Include="Assets\playermodelstand" />
+    <EmbeddedResource Include="PlayerAssets\Amogus.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Babbling Baboon.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Beautifulboy.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\character stump.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\HazmatGorilla.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Kyle The Robot.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Lar Gibbon.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\RobotMonke.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Siamang Gibbon.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Skeleton.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\The Ape.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\The Chimp.gtmodel" />
+    <EmbeddedResource Include="PlayerAssets\Toon Gorilla.gtmodel" />
   </ItemGroup>
 
   <ItemGroup>

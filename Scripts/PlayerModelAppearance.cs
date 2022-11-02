@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Photon.Pun;
 using System.Collections.Generic;
 
 namespace PlayerModel.Player
@@ -34,8 +33,8 @@ namespace PlayerModel.Player
         static public void HideOfflineRig()
         {
             GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            gorillaface.GetComponent<Renderer>().forceRenderingOff = true; // turns model off
-
+            //gorillaface.GetComponent<Renderer>().forceRenderingOff = true; // turns model off
+            gorillaface.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 1, 1, 0.0f));
             GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
             gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
 
@@ -48,8 +47,8 @@ namespace PlayerModel.Player
         static public void ShowOfflineRig()
         {
             GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            gorillaface.GetComponent<Renderer>().forceRenderingOff = false; // turns model on
-
+            //gorillaface.GetComponent<Renderer>().forceRenderingOff = false; // turns model on
+            gorillaface.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 1, 1, 1.0f));
             GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
             gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = false;
 
@@ -68,17 +67,39 @@ namespace PlayerModel.Player
 
         
         static public Material mat;
-        static public void AssignColor(GameObject playermodel)
+
+
+        static public void AssignColor()
         {
+            mat_index = PlayerModelController.gamemat_index;
+            colormat_index = PlayerModelController.colormat_index;
             gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
-            rendGorilla = gorillabody.GetComponent<Renderer>();
-            gorillacolor = rendGorilla.material.color;
-            
-            playermodel.GetComponent<SkinnedMeshRenderer>().material.SetColor("_Color", gorillacolor);
+
+            if (colormat_index != mat_index || playermats[mat_index] == Plugin.player_main_material)
+            {
+                if(playermats[colormat_index] != null)
+                {
+                    playermats[colormat_index].color = gorillabody.GetComponent<Renderer>().material.color;
+                }
+                
+            }
 
         }
 
-        static public void ResetMaterial(GameObject playermodel) => playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
+        static public void ResetMaterial(GameObject playermodel)
+        {
+            
+            mat_index = PlayerModelController.gamemat_index;
+            colormat_index = PlayerModelController.colormat_index;
+
+            if (playermats != null)
+            {
+                if (playermats[mat_index] != Plugin.player_main_material)
+                {
+                    playermats[mat_index] = Plugin.player_main_material;
+                }
+            }
+        }
 
         static bool IsBattleMat(GameObject tbod)
         {
@@ -130,44 +151,34 @@ namespace PlayerModel.Player
             return false;
         }
 
+        public static int mat_index;
+        public static int colormat_index;
+        public static Material premat;
+        public static Material[] playermats;//used to store reference of selected playermodel to assign back
         static public void AssignMaterial(GameObject clone_body, GameObject playermodel)
         {
-            if(clone_body != null && playermodel != null)
-            {
-                playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
+            mat_index = PlayerModelController.gamemat_index;
+            colormat_index = PlayerModelController.colormat_index;
 
-                if (clone_body.GetComponent<Renderer>().material.name == "infected (Instance)")
+            if (clone_body != null && playermodel != null)
+            {
+                if(clone_body.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")
                 {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[1];
-                }
-                else if (clone_body.GetComponent<Renderer>().material.name == "It (Instance)")
-                {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[2];
-                }
-                else if (clone_body.GetComponent<Renderer>().material.name == "ice (Instance)")
-                {
-                    playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.mat_preview[3];
+                    if(playermats[mat_index] != Plugin.player_main_material)
+                    {
+                        playermats[mat_index] = Plugin.player_main_material;
+                    }
+                    
                 }
                 else
                 {
-                    if (IsBattleMat(clone_body) == true)
+                    if(playermats[mat_index] != clone_body.GetComponent<Renderer>().material)
                     {
-                        if (IsBattleMat2(clone_body) == true)
-                        {
-                            playermodel.GetComponent<SkinnedMeshRenderer>().material = clone_body.GetComponent<Renderer>().material;
-                        }
-                        else
-                        {
-                            playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
-                            playermodel.GetComponent<SkinnedMeshRenderer>().material.color = clone_body.GetComponent<Renderer>().material.color;
-                        }
-                    }
-                    else
-                    {
-                        playermodel.GetComponent<SkinnedMeshRenderer>().material = PlayerModel.Plugin.player_main_material;
+                        playermats[mat_index] = clone_body.GetComponent<Renderer>().material;
                     }
                 }
 
+                playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
             }
             else
             {

@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using DitzelGames.FastIK;
+using UnityEngine.XR;
+using System;
 
 namespace PlayerModel.Player
 {
@@ -24,8 +26,12 @@ namespace PlayerModel.Player
 
         static public string playermodel_name;
         static public string playermodel_author;
+
         static public bool CustomColors;
+        static public string colorMat;
+
         static public bool GameModeTextures;
+        static public string gameMat;
 
         static public GameObject player_preview;
         static public string namegui;
@@ -33,13 +39,16 @@ namespace PlayerModel.Player
         public static float rotationY = -60f;
         public static float localPositionY = 0.15f;
 
+        public static int gamemat_index;
+        public static int colormat_index;
+
         static public void PreviewModel(int index)
         {
             if (player_preview != null)
                 Destroy(player_preview);
 
             string path = Path.Combine(Plugin.playerpath, Plugin.fileName[index]);
-            Debug.Log(path);
+            //Debug.Log(path);
 
             AssetBundle playerbundle = AssetBundle.LoadFromFile(path);
             GameObject assetplayer = playerbundle.LoadAsset<GameObject>("playermodel.ParentObject");
@@ -50,6 +59,7 @@ namespace PlayerModel.Player
                 playerbundle.Unload(false);
 
                 player_info_stream = parentAsset.GetComponent<Text>().text;
+                //Debug.Log(player_info_stream);
                 player_info = player_info_stream.Split('$');
 
                 parentAsset.GetComponent<Text>().enabled = false;
@@ -78,8 +88,54 @@ namespace PlayerModel.Player
                 Plugin.model_text.text = playermodel_name.ToUpper(); ;
                 Plugin.author_text.text = playermodel_author.ToUpper();
 
-                Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
-                Plugin.SetMainDisplayButtonMaterial(player_preview.GetComponent<MeshRenderer>().material);
+                //new playermodel info here:
+                if (player_info.Length > 4)
+                {
+                    Plugin.mat_preview[0] = null;
+                    Plugin.SetMainDisplayButtonMaterial(Plugin.mat_preview[0]);
+                    bool checkmat = true;
+                    bool gamemodetex = bool.Parse(player_info[3]); //if gamemodetextures are changable
+                    string gameMatname = player_info[5];
+                    //Debug.Log("gamemode texture material: "+ gameMatname);
+
+                    if (gamemodetex)//player_info[5] is the gameMat assigned material name
+                    {
+                        //Debug.Log("Mat Search start");
+                        for (int i = 0; i < material_array.Length; i++)//cycles mat list to match material name to assign gameMat changing
+                        {
+                            //Debug.Log(material_array[i].name);
+                            if (gameMatname == material_array[i].name)
+                            {
+                                Plugin.mat_preview[0] = material_array[i];
+                                Plugin.SetMainDisplayButtonMaterial(material_array[i]);
+                                checkmat = false;
+                                break;
+                            }
+                            //possible bug here: if the gameMatname isnt found in the preview material list, it would be assigned to mat_preview[0] etc
+                            //will make sure to have the text_info have the material name in the project, will add error logs in project
+                            
+                        }
+                        if (checkmat)
+                        {
+                            Debug.LogError("Material Reference not Found");
+                        }
+                    }
+                    else
+                    {
+                        Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
+                        Plugin.SetMainDisplayButtonMaterial(player_preview.GetComponent<MeshRenderer>().material);
+                        
+                    }
+                }
+                else
+                {
+                    Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
+                    Plugin.SetMainDisplayButtonMaterial(player_preview.GetComponent<MeshRenderer>().material);
+                    
+                }
+
+
+
 
                 player_preview.AddComponent<SpinYouBaboon>();
 
@@ -109,6 +165,9 @@ namespace PlayerModel.Player
                 GameObject poleR = GameObject.Find("poleR");
                 GameObject poleL = GameObject.Find("poleL");
 
+                digit_L.Clear();
+                digit_R.Clear();
+
                 Destroy(poleR);
                 Destroy(poleL);
                 Destroy(LeftTarget);
@@ -133,11 +192,13 @@ namespace PlayerModel.Player
         public static GameObject poleR;
         public static GameObject poleL;
 
+        public static List<GameObject> digit_R = new List<GameObject>();
+        public static List<GameObject> digit_L = new List<GameObject>();
+
+
         public static Quaternion headoffset;
         static public void LoadModel(int index)
         {
-
-
             AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
             if (playerbundle != null)
             {
@@ -149,6 +210,7 @@ namespace PlayerModel.Player
                     playerbundle.Unload(false);
 
                     player_info_stream = parentAsset.GetComponent<Text>().text;
+
                     player_info = player_info_stream.Split('$');
 
                     parentAsset.GetComponent<Text>().enabled = false;
@@ -169,34 +231,62 @@ namespace PlayerModel.Player
                     headbone = GameObject.Find(playermodel_head);
                     headtarget = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head");
 
-                    PlayerModel.Plugin.player_main_material = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().material; //saves playermodel material
+                    PlayerModelAppearance.playermats = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().materials;
+                    
+                    
+                    if (player_info.Length > 4)//new version of PlayerModel V2
+                    {
+                       
+                        colorMat = player_info[4];
+                        gameMat = player_info[5];
+
+                        for(int i = 0; i< PlayerModelAppearance.playermats.Length; i++)
+                        {
+                            //find Color Material
+                            if(colorMat == PlayerModelAppearance.playermats[i].name)
+                            {
+                                colormat_index = i;
+                                //Debug.Log("Assigned Color material to: "+ i +" " + PlayerModelAppearance.playermats[i]);
+                            }
+
+                            //find GameTexture material
+                            if (gameMat == PlayerModelAppearance.playermats[i].name)
+                            {
+                                Plugin.player_main_material = PlayerModelAppearance.playermats[i];
+                                gamemat_index = i;
+                                //Debug.Log("Assigned Game material to: " + i + " " + PlayerModelAppearance.playermats[i]);
+                            }
+                        }
+                    }
+                    else
+                    {//PlayerModel V1
+                        gamemat_index = 0;
+                        colormat_index = 0;
+                        Plugin.player_main_material = PlayerModelAppearance.playermats[0]; //saves playermodel material
+                    }
+
+                    
                 }
             }
         }
 
+        public static int modelVersion;
         static public void AssignModel()
         {
-            /*GameObject left_finger = GameObject.Find("playermodel.left_finger");
-            GameObject right_finger = GameObject.Find("playermodel.right_finger");
-
-            if (left_finger != null && right_finger != null)
+            if (player_info.Length > 4)
             {
-                left_finger.AddComponent<SphereCollider>().radius = 0.01f;
-                right_finger.AddComponent<SphereCollider>().radius = 0.01f;
-                left_finger.layer = 10;
-                right_finger.layer = 10;
-
-                GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
-                GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = false;
-            }*/
-
+                modelVersion = 1;
+            }
+            else
+            {
+                modelVersion = 0;
+            }
             GameObject hand_l = GameObject.Find("hand.L");
             GameObject hand_r = GameObject.Find("hand.R");
 
             offsetL.transform.SetParent(hand_l.transform, false);
 
             offsetR.transform.SetParent(hand_r.transform, false);
-
 
             poleR = new GameObject("poleR");
             poleR.transform.SetParent(root.transform, false);
@@ -218,7 +308,6 @@ namespace PlayerModel.Player
             lefthandpos.transform.SetPositionAndRotation(HandLeft.transform.position, HandLeft.transform.rotation);
             righthandpos.transform.SetPositionAndRotation(HandRight.transform.position, HandRight.transform.rotation);
 
-
             HandLeft.transform.SetPositionAndRotation(hand_l.transform.position, hand_l.transform.rotation);
             HandRight.transform.SetPositionAndRotation(hand_r.transform.position, hand_r.transform.rotation);
 
@@ -234,9 +323,17 @@ namespace PlayerModel.Player
             HandLeft.transform.SetParent(hand_l.transform, true);
             HandRight.transform.SetParent(hand_r.transform, true);
 
+            //get each digit on each hand (parent bone of each digit)
+
+            if (modelVersion > 0)
+            {
+                assignDigit(HandLeft, digit_L);
+                assignDigit(HandRight, digit_R);
+                root.AddComponent<fingermovement>();
+            }
+
             HandLeft = lefthandpos;
             HandRight = righthandpos;
-
 
             HandLeft.AddComponent<FastIKFabric>();
             HandLeft.GetComponent<FastIKFabric>().Target = offsetL.transform;
@@ -252,9 +349,40 @@ namespace PlayerModel.Player
             headoffset = headtarget.transform.localRotation;
             headbone.transform.SetParent(headtarget.transform, true);
             headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
-
+            
         }
+        static public void assignDigit(GameObject hand, List<GameObject> digits)
+        {
+            List<GameObject> local = new List<GameObject>();
 
+            foreach (Transform fingies in hand.transform)
+            {
+                local.Add(fingies.gameObject);
+            }
+            int index = 0;
+            int mid = 0;
+            int thumb = 0;
+            //reorder list to index, middle, thumb
+            for (int i = 0; i < hand.transform.childCount; i++)
+            {
+                if (hand.transform.GetChild(i).name.Contains("index"))
+                {
+                    index = i;
+                }
+                if (hand.transform.GetChild(i).name.Contains("middle"))
+                {
+                    mid = i;
+                }
+                if (hand.transform.GetChild(i).name.Contains("thumb"))
+                {
+                    thumb = i;
+                }
+            }
+
+            digits.Add(hand.transform.GetChild(index).gameObject);
+            digits.Add(hand.transform.GetChild(mid).gameObject);
+            digits.Add(hand.transform.GetChild(thumb).gameObject);
+        }
         public class SpinYouBaboon : MonoBehaviour
         {
             float to;
@@ -265,6 +393,157 @@ namespace PlayerModel.Player
                 transform.position = pos + new Vector3(0, to, 0);
             }
         }
+        
+        public class fingermovement : MonoBehaviour
+        {
+            float remapvalue = -75.0f; //degrees
+            public float rightGrip;
+            public float rightTrigger;
+            public bool rightSecondary;
+
+            public float leftGrip;
+            public float leftTrigger;
+            public bool leftSecondary;
+
+            public readonly XRNode lNode = XRNode.LeftHand;
+            public readonly XRNode rNode = XRNode.RightHand;
+
+            List<GameObject> objs = new List<GameObject>();
+
+            bool ready = false;
+
+            
+            void Start()
+            {
+                //Debug.Log("add smoothing script");
+                for (int i = 0; i < digit_L.Count; i++)
+                {
+                    digit_L[i].AddComponent<smoothing>();
+                    digit_R[i].AddComponent<smoothing>();
+                    objs.Add(digit_L[i]);
+                    
+                }
+                for (int i = 0; i < digit_L.Count; i++)
+                {
+                    objs.Add(digit_R[i]);
+
+                }
+
+                for (int i = 0; i < objs.Count; i++)
+                {
+                    ResetTransforms(objs[i]);
+                    ResetTransforms(objs[i].transform.GetChild(0).gameObject);
+                    ResetTransforms(objs[i].transform.GetChild(0).GetChild(0).GetChild(0).gameObject);
+                }
+
+                ready = true;
+            }
+            void Update()
+            {
+                if (ready)
+                {
+                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.grip, out leftGrip);
+                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out leftTrigger);
+                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out leftSecondary);
+
+                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.grip, out rightGrip);
+                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out rightTrigger);
+                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out rightSecondary);
+
+                    digit_L[0].GetComponent<smoothing>().input = leftTrigger;
+                    digit_L[1].GetComponent<smoothing>().input = leftGrip;
+                    digit_L[2].GetComponent<smoothing>().input = Convert.ToSingle(leftSecondary);
+
+                    digit_R[0].GetComponent<smoothing>().input = rightTrigger;
+                    digit_R[1].GetComponent<smoothing>().input = rightGrip;
+                    digit_R[2].GetComponent<smoothing>().input = Convert.ToSingle(rightSecondary);
+
+
+                    //Debug.Log(Convert.ToSingle(leftSecondary));
+                    fingermove(digit_L[0], digit_L[0].GetComponent<smoothing>().avg);
+                    fingermove(digit_L[1], digit_L[1].GetComponent<smoothing>().avg);
+                    fingermove(digit_L[2], digit_L[2].GetComponent<smoothing>().avg);
+
+                    fingermove(digit_R[0], digit_R[0].GetComponent<smoothing>().avg);
+                    fingermove(digit_R[1], digit_R[1].GetComponent<smoothing>().avg);
+                    fingermove(digit_R[2], digit_R[2].GetComponent<smoothing>().avg);
+                }
+                
+            }
+
+            void fingermove(GameObject parent, float input)//parent digit bone, float value from vr controller input (0.0->1.0)
+            {
+                float angle = Remap(input,remapvalue);//converts normalize value to relative angle to bone
+                float angle2 = Remap(input,remapvalue);
+                Vector3 localAngle = parent.transform.localEulerAngles;
+
+                parent.transform.localEulerAngles = new Vector3(angle, localAngle.y, localAngle.z);//parent bone
+
+                Vector3 localangle1 = parent.transform.GetChild(0).GetChild(0).localEulerAngles;
+
+                parent.transform.GetChild(0).GetChild(0).localEulerAngles = new Vector3(angle2, localangle1.y, localangle1.z);//middle bone
+
+                Vector3 localangle2 = parent.transform.GetChild(0).GetChild(0).GetChild(0).localEulerAngles;
+
+                parent.transform.GetChild(0).GetChild(0).GetChild(0).localEulerAngles = new Vector3(angle2, localangle2.y, localangle2.z);//end bone
+
+            }
+
+            float Remap(float source,float targetTo)
+            {
+                
+                float sourceTo = 1;
+                float sourceFrom = 0;
+                float targetFrom = 0;
+                return targetFrom + (source - sourceFrom) * (targetTo - targetFrom) / (sourceTo - sourceFrom);
+            }
+            void ResetTransforms(GameObject obj)
+            {
+                GameObject newParent = new GameObject();
+                newParent.name = "newParent_" + obj.name;
+                newParent.transform.SetParent(obj.transform.parent, false);
+                newParent.transform.SetPositionAndRotation(obj.transform.position, obj.transform.rotation);
+                newParent.transform.localScale = obj.transform.localScale;
+                obj.transform.SetParent(newParent.transform, true);
+            }
+
+        }
+
+        public class smoothing : MonoBehaviour
+        {
+
+            const int samples = 3;
+            float[] readings = new float[samples];
+            int index = 0;
+            float total = 0;
+            public float avg = 0;
+
+            public float input;
+
+            void Start()
+            {
+                for(int i = 0; i < readings.Length; i++)
+                {
+                    readings[i] = 0;
+                }
+            }
+
+            void Update()
+            {
+                total -= readings[index];
+                readings[index] = input; 
+                total += readings[index]; 
+                index++; 
+
+                if(index >= samples)
+                {
+                    index = 0;
+                }
+
+                avg = total / samples;
+            }
+        }
+
     }
 
 }
