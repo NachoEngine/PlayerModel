@@ -1,4 +1,4 @@
-# PlayerModelMod
+# PlayerModel
 
 Custom player PC mod for Gorilla Tag
 
