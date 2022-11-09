@@ -1,8 +1,10 @@
 # PlayerModel
 
-Custom player PC mod for Gorilla Tag
+PC Mod for GorillaTag
 
 This Mod allows you to change Player models!!
+
+** This is client side only. It will still show the gorilla model for other players.**
 
 ![43teryertytetyehre](https://user-images.githubusercontent.com/65086429/172032297-e52cb4e3-c77b-4225-b3be-569fbfb03a2a.png)
 
