@@ -281,8 +281,8 @@ namespace PlayerModel.Player
             {
                 modelVersion = 0;
             }
-            GameObject hand_l = GameObject.Find("hand.L");
-            GameObject hand_r = GameObject.Find("hand.R");
+            GameObject hand_l = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L");
+            GameObject hand_r = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R");
 
             offsetL.transform.SetParent(hand_l.transform, false);
 
