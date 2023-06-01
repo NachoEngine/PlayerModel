@@ -42,6 +42,8 @@ namespace PlayerModel.Player
         public static int gamemat_index;
         public static int colormat_index;
 
+        public static bool LipSync = false;
+
         static public void PreviewModel(int index)
         {
             if (player_preview != null)
@@ -120,6 +122,15 @@ namespace PlayerModel.Player
                             Debug.LogError("Material Reference not Found");
                         }
                     }
+
+                    if(player_info.Length == 7)
+                    {
+                        if (bool.Parse(player_info[6]))
+                        {
+                            Debug.Log("This Playermodel has lipsync on");
+                        }
+                    }
+
                     else
                     {
                         Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
@@ -199,6 +210,8 @@ namespace PlayerModel.Player
         public static Quaternion headoffset;
         static public void LoadModel(int index)
         {
+            LipSync = false;
+            
             AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
             if (playerbundle != null)
             {
@@ -255,6 +268,14 @@ namespace PlayerModel.Player
                                 Plugin.player_main_material = PlayerModelAppearance.playermats[i];
                                 gamemat_index = i;
                                 //Debug.Log("Assigned Game material to: " + i + " " + PlayerModelAppearance.playermats[i]);
+                            }
+                        }
+
+                        if (player_info.Length == 7)
+                        {
+                            if (bool.Parse(player_info[6]))
+                            {
+                                LipSync = true;
                             }
                         }
                     }
@@ -349,6 +370,13 @@ namespace PlayerModel.Player
             headoffset = headtarget.transform.localRotation;
             headbone.transform.SetParent(headtarget.transform, true);
             headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
+            headbone.transform.localPosition = new Vector3(0,0,0);
+            if(player_info.Length == 7)
+            {
+                Vector3 scale = new Vector3(100, 100, 100);
+                root.transform.localScale = scale;
+                headbone.transform.localScale = scale;
+            }
             
         }
         static public void assignDigit(GameObject hand, List<GameObject> digits)

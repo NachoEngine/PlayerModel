@@ -11,22 +11,25 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using PlayerModel.Player;
 using PlayerModel.Utils;
-using System.Net;
-using UnityEngine.XR;
 using System.Linq;
+using UnityEngine.Audio;
 
 
 namespace PlayerModel
 {
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.0")]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.8")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-
-        public bool Cheaking = true;
+        static public AudioClip _audioClip;
+        static public bool _useMic = true;
+        static public string _selectedDevice;
+        static public AudioMixerGroup _mixerGroupMic;
+        static public bool Cheaking = true;
 
         public void Start()
         {
+            Debug.Log("wokring iwkjebfiqwjuhebfiuwqbhefiuwhbeofijhwbefihbwerf");
             if (STARTPLAYERMOD)
                 return;
 
@@ -59,8 +62,17 @@ namespace PlayerModel
             GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
             setmatalpha(gorillaface.GetComponent<Renderer>().material);
 
+
+            LipSyncStart();
+
             
 
+            for (int thisReading = 0; thisReading < samples; thisReading++)
+            {
+                readings[thisReading] = 0;
+            }
+
+            
 
             StartCoroutine(StartPlayerModel());
         }
@@ -233,6 +245,88 @@ namespace PlayerModel
             
             yield break;
         }
+
+        public static AudioSource _audioSource;
+        public static bool vflag = true;
+        public static GameObject voiceprefab;
+        public static AudioMixer _audioMixer;
+
+        public static GameObject voiceObject;
+
+        public static int clipPosition;
+
+        public static void restartMic()
+        {
+            _audioSource.Stop();
+            _audioSource.clip = null;
+            _audioSource.clip = Microphone.Start(_selectedDevice, true, 5, AudioSettings.outputSampleRate);
+            _audioSource.Play();
+        }
+        static public void LipSyncStart()
+        {
+            if (_useMic)
+            {
+                if (Microphone.devices.Length > 0)
+                {
+                    voiceObject = new GameObject();
+                    _audioSource = voiceObject.AddComponent<AudioSource>();
+
+                    _selectedDevice = Microphone.devices[0].ToString();
+                    Debug.Log(_selectedDevice);
+                    _audioSource.clip = Microphone.Start(_selectedDevice, true, 5, AudioSettings.outputSampleRate);
+
+                    _audioSource.spatialBlend = 1f;
+                    _audioSource.minDistance = 0f;
+                    _audioSource.maxDistance = 1f;
+                    _audioSource.playOnAwake = true;
+                    _audioSource.loop = true;
+                    _audioSource.Play();
+
+                    voiceObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    voiceObject.transform.position = new Vector3(-66, 12, -82);
+
+                }
+                else
+                {
+                    _useMic = false;
+                    Debug.LogError("Micropohone is missing kwjebfiwujeenbfiubwefijbwefijbwefijwbefijwbefijwbefijwbefijwbefijwbef");
+                }
+            }
+        }
+        public static GameObject mouth;
+        public static int sampleWindow = 64;
+
+        public static float loudnessSensitivity = 100;
+        public static float threshold = 0.2f;
+
+        public static AudioClip MicClip;
+        public static float GetLoudnessFromMic()
+        {
+            return AudioClipLoudness(Microphone.GetPosition(Microphone.devices[0]), _audioSource.clip);
+        }
+        static public float AudioClipLoudness(int clipPosition, AudioClip clip)
+        {
+            int startPosition = clipPosition - sampleWindow;
+
+            if (startPosition < 0)
+                return 0;
+
+            float[] waveData = new float[sampleWindow];
+            clip.GetData(waveData, startPosition);
+
+            //compute loudness
+
+            float totalLoudness = 0;
+
+            for (int i = 0; i < sampleWindow; i++)
+            {
+                totalLoudness += Mathf.Abs(waveData[i]);
+
+            }
+
+            return totalLoudness / sampleWindow;
+        }
+        
         static string textfilename = "PlayerModelDefault.pmdefault";
         static string split = ",";
         public static void writeToText(int index_, int IsGorilla_, string name)
@@ -368,8 +462,17 @@ namespace PlayerModel
             //Debug.Log("material set to gorilla");
         }
 
+        public float voiceDelay = 1;
+
+        
+
         public void Update()
         {
+
+            
+
+
+
             if (Time.time < currentTime)
                 return;
 
@@ -379,13 +482,68 @@ namespace PlayerModel
                 PlayerModelController.localPositionY = -1f;
             else
                 PlayerModelController.localPositionY = 1f;
+
+            
+
         }
 
+        public const int samples = 10;
+
+        float[] readings = new float[samples];
+        int readIndex = 0;
+        float total = 0;
+        public float avg = 0;
+
+
+
+        public void voiceSmoothing()
+        {
+            
+            total -= readings[readIndex];
+            
+            readings[readIndex] = loudness;
+            // add the reading to the total:
+            total = total + readings[readIndex];
+            // advance to the next position in the array:
+            readIndex++;
+
+            // if we're at the end of the array...
+            if (readIndex >= samples)
+            {
+                // ...wrap around to the beginning:
+                
+                readIndex = 0;
+            }
+
+            // calculate the average:
+            avg = total / samples;
+            
+        }
+        public static float loudness;
+
+        public float LipSyncWeight = 0;
+
+        public bool LipSyncFlag = true;
         public void FixedUpdate()
         {
             
             if (!STARTPLAYERMOD)
                 return;
+
+            loudness = GetLoudnessFromMic() * loudnessSensitivity;
+
+            voiceSmoothing();
+
+            if (avg < threshold)
+                avg = 0;
+
+            Vector3 minScale = new Vector3(.1f, .1f, .1f);
+            Vector3 maxScale = new Vector3(1f, 1f, 1f);
+
+            voiceObject.transform.localScale = Vector3.Lerp(minScale, maxScale, avg);
+
+            LipSyncWeight = Mathf.Lerp(0,100,avg);
+
 
             if (Keyboard.current.jKey.wasPressedThisFrame)
                 SelectButton.GetComponent<PlayerModelButton>().Press();
@@ -398,8 +556,34 @@ namespace PlayerModel
 
             PlayerModelController.rotationY -= 0.5f;
             //Debug.Log(IsGorilla);
-            if (PhotonNetwork.InRoom)
+
+            if (GorillaParent.instance.vrrigs.Count >= 1)
             {
+                if (Time.time > voiceDelay)
+                {
+
+                    voiceDelay += 1;
+                    Debug.Log("new time " + voiceDelay);
+                    restartMic();
+
+
+                }
+
+            }
+            else
+            {
+                if (!LipSyncFlag)
+                {
+
+                    restartMic();
+                    LipSyncFlag = true;
+                    Debug.Log("Mic Restart");
+                }
+            }
+
+                if (PhotonNetwork.InRoom)
+            {
+                
                 if (IsGorilla == true)//in a room, is gorilla model
                 {
                     PlayerModelAppearance.ShowOnlineRig();
@@ -424,6 +608,11 @@ namespace PlayerModel
                         if (PlayerModelController.GameModeTextures)
                             clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
                             PlayerModelAppearance.AssignMaterial(clone_body, playermodel);
+
+                        if (PlayerModelController.LipSync)
+                        {
+                            playermodel.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0, LipSyncWeight);
+                        }
                     }
 
                     if (clone_body == null)
@@ -443,6 +632,7 @@ namespace PlayerModel
             else if (!PhotonNetwork.InRoom)
             {
                 
+
                 flag_inroom = false;
                 clone_body = null;
                 if (IsGorilla == true)//not in a room, is gorilla model
@@ -465,6 +655,12 @@ namespace PlayerModel
                         
                         if (PlayerModelController.CustomColors)
                             PlayerModelAppearance.AssignColor();
+
+                        if (PlayerModelController.LipSync)
+                        {
+                            playermodel.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0, LipSyncWeight);
+                        }
+
                     }
                     else //redundency
                     {
