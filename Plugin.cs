@@ -283,6 +283,8 @@ namespace PlayerModel
                     _audioSource.Play();
 
                     voiceObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    voiceObject.GetComponent<SphereCollider>().enabled = false;
+                    voiceObject.GetComponent<MeshRenderer>().enabled = false;
                     voiceObject.transform.position = new Vector3(-66, 12, -82);
 
                 }
