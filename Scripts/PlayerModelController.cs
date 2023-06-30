@@ -159,12 +159,14 @@ namespace PlayerModel.Player
 
         static public void UnloadModel()
         {
+            
             GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
             GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
 
             GameObject playermodel = GameObject.Find("playermodel.ParentObject(Clone)");
             if (playermodel != null)
             {
+                Debug.Log("Unloading Playermodel");
                 GameObject headbone = GameObject.Find(playermodel_head);
                 GameObject HandRight = GameObject.Find(playermodel_lefthand);
                 GameObject HandLeft = GameObject.Find(playermodel_righthand);
@@ -210,6 +212,7 @@ namespace PlayerModel.Player
         public static Quaternion headoffset;
         static public void LoadModel(int index)
         {
+            Debug.Log("Loading Playermodel: "+index);
             LipSync = false;
             
             AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
@@ -227,7 +230,7 @@ namespace PlayerModel.Player
                     player_info = player_info_stream.Split('$');
 
                     parentAsset.GetComponent<Text>().enabled = false;
-
+                    Debug.Log(player_info[0]);
                     CustomColors = bool.Parse(player_info[2]);
 
                     GameModeTextures = bool.Parse(player_info[3]);
@@ -267,7 +270,7 @@ namespace PlayerModel.Player
                             {
                                 Plugin.player_main_material = PlayerModelAppearance.playermats[i];
                                 gamemat_index = i;
-                                //Debug.Log("Assigned Game material to: " + i + " " + PlayerModelAppearance.playermats[i]);
+                                Debug.Log("Assigned Main mat: "+ Plugin.player_main_material + " to: " + i + " " + PlayerModelAppearance.playermats[i]);
                             }
                         }
 
@@ -294,6 +297,7 @@ namespace PlayerModel.Player
         public static int modelVersion;
         static public void AssignModel()
         {
+            Debug.Log("playermodel assigned");
             if (player_info.Length > 4)
             {
                 modelVersion = 1;
@@ -411,6 +415,28 @@ namespace PlayerModel.Player
             digits.Add(hand.transform.GetChild(mid).gameObject);
             digits.Add(hand.transform.GetChild(thumb).gameObject);
         }
+        float currentTime;
+        public void Update()
+        {
+
+
+
+
+
+            if (Time.time < currentTime)
+                return;
+
+            currentTime = Time.time + 1;
+
+            if (PlayerModelController.localPositionY == 1f)
+                PlayerModelController.localPositionY = -1f;
+            else
+                PlayerModelController.localPositionY = 1f;
+
+
+
+        }
+
         public class SpinYouBaboon : MonoBehaviour
         {
             float to;

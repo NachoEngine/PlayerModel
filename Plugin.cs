@@ -17,6 +17,7 @@ using UnityEngine.Audio;
 
 namespace PlayerModel
 {
+    [ModdedGamemode]
     [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.8")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
@@ -26,15 +27,11 @@ namespace PlayerModel
         static public string _selectedDevice;
         static public AudioMixerGroup _mixerGroupMic;
         static public bool Cheaking = true;
-
-        public void Start()
+        void Awake()
         {
-            Debug.Log("wokring iwkjebfiqwjuhebfiuwqbhefiuwhbeofijhwbefihbwerf");
-            if (STARTPLAYERMOD)
-                return;
-
-            Events.GameInitialized += OnGameInitialized;
+            Utilla.Events.GameInitialized += OnGameInitialized;
         }
+        
 
         string rootPath;
         public static string textSavePath;
@@ -45,56 +42,27 @@ namespace PlayerModel
         public static List<Material> materials = new List<Material>();
         public static Material defMat;
         public static Material matalpha;
-        public static Material chestmat;
-        GameObject gorillachest;
         
-        void OnGameInitialized(object sender, EventArgs e)
+        
+        
+        public void OnGameInitialized(object sender, EventArgs e)
         {
-            //forcerenderingoff or switching to transparent material breaks the mod
-            //this sets gorillachest standard material to transparent mode
-            //uses the alpha channel to hide the gorillachest when selecting a playermodel
             
-            gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest");
-            chestmat = gorillachest.GetComponent<Renderer>().material;
-            //Debug.Log("ChestMaterial Shader:  " + chestmat.shader.name);
-            setmatalpha(chestmat);
-
-            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            setmatalpha(gorillaface.GetComponent<Renderer>().material);
-
-
-            LipSyncStart();
-
-            
-
+            //LipSyncStart();
             for (int thisReading = 0; thisReading < samples; thisReading++)
             {
                 readings[thisReading] = 0;
             }
 
-            
-
-            StartCoroutine(StartPlayerModel());
-        }
-        void setmatalpha(Material mat)
-        {
-            mat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
-            mat.SetFloat("_Mode", 3);
-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.renderQueue = 3000;
-
-        }
-        IEnumerator StartPlayerModel()
-        {
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/gorilla"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/rig/body/gorillachest"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/rig/body/head/gorillaface"));
+            PlayerModelAppearance.gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
 
+            
             rootPath = Directory.GetCurrentDirectory();
 
             playerpath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", "PlayerAssets");
@@ -107,9 +75,9 @@ namespace PlayerModel
 
                 //removes not gtmodels from list
                 string type = ".gtmodel";
-                for(int i = 0; i <embededmodels.Count; i++)
+                for (int i = 0; i < embededmodels.Count; i++)
                 {
-                    
+
                     if (!embededmodels[i].EndsWith(type))
                     {
                         embededmodels.Remove(embededmodels[i]);
@@ -132,7 +100,7 @@ namespace PlayerModel
 
                     }
                 }
-                
+
             }
 
             files = Directory.GetFiles(playerpath, "*.gtmodel");//cant Path.GetFileName - cant convert string[] to string
@@ -153,7 +121,7 @@ namespace PlayerModel
             DontDestroyOnLoad(localasset);
             //Debug.Log("MISC Loaded");
             GameObject misc = localasset.transform.GetChild(0).gameObject;
-            
+
             misc.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
             misc.transform.localRotation = Quaternion.Euler(0f, -60f, 0f);
             //Debug.Log("MISC Child");
@@ -190,7 +158,7 @@ namespace PlayerModel
             {
                 misc_orbs[i].AddComponent<PlayerModelButton>().button = 4 + i;
                 misc_orbs[i].GetComponent<PlayerModelButton>().setColour = false;
-                yield return new WaitForEndOfFrame();
+                
             }
 
             materials.Add(Resources.Load<Material>($"objects/equipment/materials/" + "bluealive"));
@@ -202,7 +170,7 @@ namespace PlayerModel
             for (int i = 0; i < mat_preview.Length; i++)
             {
                 mat_preview[i] = misc_orbs[i].GetComponent<MeshRenderer>().material;
-                yield return new WaitForEndOfFrame();
+                
             }
 
             GameObject left_empty = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -214,15 +182,15 @@ namespace PlayerModel
             left_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
             right_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
 
-            STARTPLAYERMOD = true;
             
+
             if (File.Exists(textSavePath))
             {
                 string[] defaultdata = readFromText(textSavePath);
 
                 //Debug.Log("Checking Default PlayerModel Data");
                 //Debug.Log(defaultdata[1]);
-                if(defaultdata[1] == Convert.ToString(0))//If IsGorilla
+                if (defaultdata[1] == Convert.ToString(0))//If IsGorilla
                 {
                     PlayerModelController.PreviewModel(Convert.ToInt32(defaultdata[0]));
                     if (defaultdata[2] == model_text.text)//matching playermodel name
@@ -232,8 +200,9 @@ namespace PlayerModel
                         PlayerModelController.PreviewModel(playerIndex);
                         IsGorilla = false;
                     }
-                    
-                }else
+
+                }
+                else
                 {
                     //Debug.Log("Loading as Gorilla");
                     playerIndex = 0;
@@ -242,9 +211,10 @@ namespace PlayerModel
                 }
 
             }
-            
-            yield break;
+            STARTPLAYERMOD = true;
+
         }
+        
 
         public static AudioSource _audioSource;
         public static bool vflag = true;
@@ -378,8 +348,9 @@ namespace PlayerModel
         {
             switch (button)
             {
+                
                 case 1:
-
+                    Debug.Log("Selector Button Pressed");
                     if (nachotext == false)
                     {
                         Destroy(GameObject.Find("nachoengine_playermodelmod"));
@@ -398,20 +369,26 @@ namespace PlayerModel
                         IsGorilla = false;
                         PlayerModelController.AssignModel();
                     }
-                    else
+                    else//playermodel is assaigned, and spressed select button
                     {
+                        
                         if (assignedIndex == playerIndex)//playermodel to gorilla 
                         {
+                            Debug.Log("PlayerModel to Gorilla");
                             PlayerModelController.UnloadModel();
                             IsGorilla = true;
                             player_main_material = null;
                         }
                         else//playermodel to playermodel
                         {
+                            Debug.Log("PlayerModel to PlayerModel");
                             PlayerModelController.UnloadModel();
-                            IsGorilla = false;
                             player_main_material = null;
+
+                            
                             assignedIndex = playerIndex;
+                            
+                            
                         }
                     }
                     //writeToText(assignedIndex, Convert.ToInt32(IsGorilla));
@@ -419,16 +396,19 @@ namespace PlayerModel
 
                     break;
                 case 2:
-                    playerIndex++;
-                    if (playerIndex > fileName.Length - 1)
+                    playerIndex++; //righjt
+                    Debug.Log("Right");
+                    
+                    if (playerIndex > fileName.Length-1)
                         playerIndex = 0;
                     PlayerModelController.PreviewModel(playerIndex);
 
                     break;
                 case 3:
                     playerIndex--;
+                    Debug.Log("Left");
                     if (playerIndex < 0)
-                        playerIndex = fileName.Length - 1;//10 items but starts from 0 so 0 to 9 = 10 items
+                        playerIndex = fileName.Length-1;//10 items but starts from 0 so 0 to 9 = 10 items
                     PlayerModelController.PreviewModel(playerIndex);
 
                     break;
@@ -453,50 +433,15 @@ namespace PlayerModel
 
         public float currentTime = 0;
         
-        public void hidechest()
-        {
-            chestmat.SetColor("_Color", new Color(1, 1, 1, 0.0f));
-            //Debug.Log("material set to alpha");
-        }
-        public void showchest()
-        {
-            chestmat.SetColor("_Color", new Color(1, 1, 1, 1.0f));
-            //Debug.Log("material set to gorilla");
-        }
-
-        public float voiceDelay = 1;
-
         
 
-        public void Update()
-        {
-
-            
-
-
-
-            if (Time.time < currentTime)
-                return;
-
-            currentTime = Time.time + 1;
-
-            if (PlayerModelController.localPositionY == 1f)
-                PlayerModelController.localPositionY = -1f;
-            else
-                PlayerModelController.localPositionY = 1f;
-
-            
-
-        }
-
+        public float voiceDelay = 1;
         public const int samples = 10;
 
         float[] readings = new float[samples];
         int readIndex = 0;
         float total = 0;
         public float avg = 0;
-
-
 
         public void voiceSmoothing()
         {
@@ -524,15 +469,16 @@ namespace PlayerModel
         public static float loudness;
 
         public float LipSyncWeight = 0;
-
+        
         public bool LipSyncFlag = true;
-        public void FixedUpdate()
+        private void Update()
         {
-            
             if (!STARTPLAYERMOD)
+            {
                 return;
-
-            loudness = GetLoudnessFromMic() * loudnessSensitivity;
+            }
+            
+            /*loudness = GetLoudnessFromMic() * loudnessSensitivity;
 
             voiceSmoothing();
 
@@ -544,8 +490,8 @@ namespace PlayerModel
 
             voiceObject.transform.localScale = Vector3.Lerp(minScale, maxScale, avg);
 
-            LipSyncWeight = Mathf.Lerp(0,100,avg);
-
+            LipSyncWeight = Mathf.Lerp(0, 100, avg);
+*/
 
             if (Keyboard.current.jKey.wasPressedThisFrame)
                 SelectButton.GetComponent<PlayerModelButton>().Press();
@@ -559,7 +505,7 @@ namespace PlayerModel
             PlayerModelController.rotationY -= 0.5f;
             //Debug.Log(IsGorilla);
 
-            if (GorillaParent.instance.vrrigs.Count >= 1)
+            /*if (GorillaParent.instance.vrrigs.Count >= 1)
             {
                 if (Time.time > voiceDelay)
                 {
@@ -581,16 +527,28 @@ namespace PlayerModel
                     LipSyncFlag = true;
                     Debug.Log("Mic Restart");
                 }
-            }
-
-                if (PhotonNetwork.InRoom)
+            }*/
+            if (!IsGorilla)
             {
+                playermodel = GameObject.Find("playermodel.body");
+                if (playermodel == null)
+                {
+                    PlayerModelController.LoadModel(playerIndex);
+                    PlayerModelController.AssignModel();
+                }
+            }
+            
+            
+                
+
+            if (PhotonNetwork.InRoom)
+                {
                 
                 if (IsGorilla == true)//in a room, is gorilla model
                 {
-                    PlayerModelAppearance.ShowOnlineRig();
+                    
                     PlayerModelAppearance.ShowOfflineRig();
-                    showchest();
+                    PlayerModelAppearance.ShowOnlineRig();
                     flag_inroom = true;
                     PlayerModelAppearance.flag1 = true;
                     
@@ -598,18 +556,18 @@ namespace PlayerModel
                 }
                 else//in a room, is playermodel
                 {
-                    if (clone_body != null && playermodel != null)
+                    if (playermodel != null)
                     {
-                        PlayerModelAppearance.HideOnlineRig();
+                        
                         PlayerModelAppearance.HideOfflineRig();
-                        hidechest();
+                        PlayerModelAppearance.HideOnlineRig();
 
                         if (PlayerModelController.CustomColors)
                             PlayerModelAppearance.AssignColor();
 
                         if (PlayerModelController.GameModeTextures)
-                            clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-                            PlayerModelAppearance.AssignMaterial(clone_body, playermodel);
+                            
+                            PlayerModelAppearance.AssignMaterial(playermodel);
 
                         if (PlayerModelController.LipSync)
                         {
@@ -617,18 +575,8 @@ namespace PlayerModel
                         }
                     }
 
-                    if (clone_body == null)
-                        clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-
-                    if (playermodel == null)
-                    {
-                        while (playermodel == null)
-                        {
-                            PlayerModelController.LoadModel(assignedIndex);
-                            playermodel = GameObject.Find("playermodel.body");
-                            PlayerModelController.AssignModel();
-                        }
-                    }
+                    
+                    
                 }
             }
             else if (!PhotonNetwork.InRoom)
@@ -642,7 +590,7 @@ namespace PlayerModel
                     
                     PlayerModelAppearance.flag1 = true;
                     PlayerModelAppearance.ShowOfflineRig();
-                    showchest();
+                    
                 }
                 else//not in a room, is playermodel
                 {
@@ -652,11 +600,13 @@ namespace PlayerModel
                         
                         PlayerModelAppearance.ResetMaterial(playermodel);
                         PlayerModelAppearance.HideOfflineRig();
-                        hidechest();
+                        
 
                         
                         if (PlayerModelController.CustomColors)
                             PlayerModelAppearance.AssignColor();
+
+                        PlayerModelAppearance.AssignMaterial(playermodel);
 
                         if (PlayerModelController.LipSync)
                         {
@@ -664,19 +614,7 @@ namespace PlayerModel
                         }
 
                     }
-                    else //redundency
-                    {
-                        while (playermodel == null)
-                        {
-                            PlayerModelController.LoadModel(playerIndex);
-                            playermodel = GameObject.Find("playermodel.body");
-
-                        }
-                        assignedIndex = playerIndex;
-                        IsGorilla = false;
-                        PlayerModelController.AssignModel();
-                        
-                    }
+                    
                 }
 
             }

@@ -29,61 +29,74 @@ namespace PlayerModel.Player
             clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
             clone_chest.GetComponent<MeshRenderer>().forceRenderingOff = true;
         }
-
         static public void HideOfflineRig()
         {
-            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            //gorillaface.GetComponent<Renderer>().forceRenderingOff = true; // turns model off
-            gorillaface.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 1, 1, 0.0f));
-            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
-            gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
+            Debug.Log("hidding gorilla");
+            int LayerCameraIgnore = LayerMask.NameToLayer("Bake");//hidden layer
 
-            /*GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
-            gorillachest.GetComponent<Renderer>().material = mat_;
-            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
-*/
+            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            gorillaface.layer = LayerCameraIgnore;
+            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            gorillabody.layer = LayerCameraIgnore;
+            GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            gorillachest.layer = LayerCameraIgnore;
+
+
         }
 
         static public void ShowOfflineRig()
         {
-            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            //gorillaface.GetComponent<Renderer>().forceRenderingOff = false; // turns model on
-            gorillaface.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 1, 1, 1.0f));
-            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
-            gorillabody.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = false;
+            int LayerCameraIgnore = LayerMask.NameToLayer("Default");
 
-            /*GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
-            gorillachest.GetComponent<Renderer>().material = mat_;
-            System.Console.WriteLine("Chest material set to: " + gorillachest.GetComponent<Renderer>().material.name);
-*/
+            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            gorillaface.layer = LayerCameraIgnore;
+            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            gorillabody.layer = LayerCameraIgnore;
+            GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            gorillachest.layer = LayerCameraIgnore;
+
         }
 
 
         static Color gorillacolor;
         
         static public bool flag1 = true;
-        static public GameObject gorillabody;
+        
         static public Renderer rendGorilla;
 
         
         static public Material mat;
+        public static GameObject gorillabody;
+        public static Color GetColor()
+        {
+            float r = PlayerPrefs.GetFloat("redValue");
+            float g = PlayerPrefs.GetFloat("greenValue");
+            float b = PlayerPrefs.GetFloat("blueValue");
+            return new Color(r,g,b);
 
-
+            
+        }
         static public void AssignColor()
         {
             mat_index = PlayerModelController.gamemat_index;
             colormat_index = PlayerModelController.colormat_index;
-            gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
 
+            //Debug.Log("color assigned");
             if (colormat_index != mat_index || playermats[mat_index] == Plugin.player_main_material)
+            //if color mat is not the same as game textures mat
+            //or
+            //if playermodel game textures mat is the main mat
             {
-                if(playermats[colormat_index] != null)
+                if (playermats[colormat_index] != null)
                 {
-                    playermats[colormat_index].color = gorillabody.GetComponent<Renderer>().material.color;
-                }
-                
-            }
+                    playermats[colormat_index].color = GetColor();
+                    Plugin.playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
 
+                }
+
+            }                
+                
+            
         }
 
         static public void ResetMaterial(GameObject playermodel)
@@ -97,6 +110,8 @@ namespace PlayerModel.Player
                 if (playermats[mat_index] != Plugin.player_main_material)
                 {
                     playermats[mat_index] = Plugin.player_main_material;
+                    Debug.Log("reset mat");
+                    playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
                 }
             }
         }
@@ -155,43 +170,40 @@ namespace PlayerModel.Player
         public static int colormat_index;
         public static Material premat;
         public static Material[] playermats;//used to store reference of selected playermodel to assign back
-        static public void AssignMaterial(GameObject clone_body, GameObject playermodel)
+        
+
+        static public void AssignMaterial(GameObject playermodel)
         {
             mat_index = PlayerModelController.gamemat_index;
             colormat_index = PlayerModelController.colormat_index;
-
-            if (clone_body != null && playermodel != null)
+            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            if(clone_body != null) //if in a lobby
             {
-                if(clone_body.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")
+                if (clone_body.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")//if not main mat
                 {
-                    if(playermats[mat_index] != Plugin.player_main_material)
+                    if (playermats[mat_index] != Plugin.player_main_material)
                     {
                         playermats[mat_index] = Plugin.player_main_material;
+                        Debug.Log("Playermodel main mat assigned");
                     }
-                    
+
                 }
                 else
                 {
-                    if(playermats[mat_index] != clone_body.GetComponent<Renderer>().material)
-                    {
-                        playermats[mat_index] = clone_body.GetComponent<Renderer>().material;
-                    }
+                    playermats[mat_index] = clone_body.GetComponent<Renderer>().material; //lava ice rockstones
                 }
 
-                playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
+                
             }
             else
             {
-                if(clone_body == null)
-                {
-                    Debug.LogError("clone_body is null");
-                }
-                if(playermodel == null)
-                {
-                    Debug.LogError("playermodel is null");
-                }
-                
+                playermats[mat_index] = Plugin.player_main_material;
             }
+            playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
+            
+
+            
+            
            
         }
 
