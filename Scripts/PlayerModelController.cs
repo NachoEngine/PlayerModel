@@ -127,7 +127,7 @@ namespace PlayerModel.Player
                     {
                         if (bool.Parse(player_info[6]))
                         {
-                            Debug.Log("This Playermodel has lipsync on");
+                            //Debug.Log("This Playermodel has lipsync on");
                         }
                     }
 
@@ -166,7 +166,7 @@ namespace PlayerModel.Player
             GameObject playermodel = GameObject.Find("playermodel.ParentObject(Clone)");
             if (playermodel != null)
             {
-                Debug.Log("Unloading Playermodel");
+                //Debug.Log("Unloading Playermodel");
                 GameObject headbone = GameObject.Find(playermodel_head);
                 GameObject HandRight = GameObject.Find(playermodel_lefthand);
                 GameObject HandLeft = GameObject.Find(playermodel_righthand);
@@ -212,7 +212,7 @@ namespace PlayerModel.Player
         public static Quaternion headoffset;
         static public void LoadModel(int index)
         {
-            Debug.Log("Loading Playermodel: "+index);
+            //Debug.Log("Loading Playermodel: "+index);
             LipSync = false;
             
             AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
@@ -226,11 +226,11 @@ namespace PlayerModel.Player
                     playerbundle.Unload(false);
 
                     player_info_stream = parentAsset.GetComponent<Text>().text;
-
+                    Debug.Log(player_info_stream);
                     player_info = player_info_stream.Split('$');
 
                     parentAsset.GetComponent<Text>().enabled = false;
-                    Debug.Log(player_info[0]);
+                    //Debug.Log(player_info[0]);
                     CustomColors = bool.Parse(player_info[2]);
 
                     GameModeTextures = bool.Parse(player_info[3]);
@@ -270,12 +270,14 @@ namespace PlayerModel.Player
                             {
                                 Plugin.player_main_material = PlayerModelAppearance.playermats[i];
                                 gamemat_index = i;
-                                Debug.Log("Assigned Main mat: "+ Plugin.player_main_material + " to: " + i + " " + PlayerModelAppearance.playermats[i]);
+                                //Debug.Log("Assigned Main mat: "+ Plugin.player_main_material + " to: " + i + " " + PlayerModelAppearance.playermats[i]);
                             }
                         }
 
-                        if (player_info.Length == 7)
+                        if (player_info.Length == 7) //PlayerModel v3
                         {
+                            modelVersion = 2;
+                            Debug.Log("playermodel v3 lipsync");
                             if (bool.Parse(player_info[6]))
                             {
                                 LipSync = true;
@@ -297,7 +299,7 @@ namespace PlayerModel.Player
         public static int modelVersion;
         static public void AssignModel()
         {
-            Debug.Log("playermodel assigned");
+            //Debug.Log("playermodel assigned");
             if (player_info.Length > 4)
             {
                 modelVersion = 1;
@@ -306,6 +308,7 @@ namespace PlayerModel.Player
             {
                 modelVersion = 0;
             }
+            Debug.Log(modelVersion);
             GameObject hand_l = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L");
             GameObject hand_r = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R");
 
@@ -377,6 +380,7 @@ namespace PlayerModel.Player
             headbone.transform.localPosition = new Vector3(0,0,0);
             if(player_info.Length == 7)
             {
+                Debug.Log("scaling for v3 model");
                 Vector3 scale = new Vector3(100, 100, 100);
                 root.transform.localScale = scale;
                 headbone.transform.localScale = scale;
@@ -416,26 +420,7 @@ namespace PlayerModel.Player
             digits.Add(hand.transform.GetChild(thumb).gameObject);
         }
         float currentTime;
-        public void Update()
-        {
-
-
-
-
-
-            if (Time.time < currentTime)
-                return;
-
-            currentTime = Time.time + 1;
-
-            if (PlayerModelController.localPositionY == 1f)
-                PlayerModelController.localPositionY = -1f;
-            else
-                PlayerModelController.localPositionY = 1f;
-
-
-
-        }
+        
 
         public class SpinYouBaboon : MonoBehaviour
         {

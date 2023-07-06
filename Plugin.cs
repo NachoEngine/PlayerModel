@@ -195,10 +195,12 @@ namespace PlayerModel
                     PlayerModelController.PreviewModel(Convert.ToInt32(defaultdata[0]));
                     if (defaultdata[2] == model_text.text)//matching playermodel name
                     {
-                        Debug.Log("Loading Default PlayerModel");
+                        //Debug.Log("Loading Default PlayerModel");
                         playerIndex = Convert.ToInt32(defaultdata[0]);
                         PlayerModelController.PreviewModel(playerIndex);
                         IsGorilla = false;
+                        assignedIndex = playerIndex;
+
                     }
 
                 }
@@ -212,7 +214,7 @@ namespace PlayerModel
 
             }
             STARTPLAYERMOD = true;
-
+            Debug.Log("PlayerModel v1.2.4");
         }
         
 
@@ -350,7 +352,7 @@ namespace PlayerModel
             {
                 
                 case 1:
-                    Debug.Log("Selector Button Pressed");
+                    //Debug.Log("Selector Button Pressed");
                     if (nachotext == false)
                     {
                         Destroy(GameObject.Find("nachoengine_playermodelmod"));
@@ -374,14 +376,14 @@ namespace PlayerModel
                         
                         if (assignedIndex == playerIndex)//playermodel to gorilla 
                         {
-                            Debug.Log("PlayerModel to Gorilla");
+                            //Debug.Log("PlayerModel to Gorilla");
                             PlayerModelController.UnloadModel();
                             IsGorilla = true;
                             player_main_material = null;
                         }
                         else//playermodel to playermodel
                         {
-                            Debug.Log("PlayerModel to PlayerModel");
+                            //Debug.Log("PlayerModel to PlayerModel");
                             PlayerModelController.UnloadModel();
                             player_main_material = null;
 
@@ -397,7 +399,7 @@ namespace PlayerModel
                     break;
                 case 2:
                     playerIndex++; //righjt
-                    Debug.Log("Right");
+                    //Debug.Log("Right");
                     
                     if (playerIndex > fileName.Length-1)
                         playerIndex = 0;
@@ -406,7 +408,7 @@ namespace PlayerModel
                     break;
                 case 3:
                     playerIndex--;
-                    Debug.Log("Left");
+                    //Debug.Log("Left");
                     if (playerIndex < 0)
                         playerIndex = fileName.Length-1;//10 items but starts from 0 so 0 to 9 = 10 items
                     PlayerModelController.PreviewModel(playerIndex);
@@ -471,13 +473,48 @@ namespace PlayerModel
         public float LipSyncWeight = 0;
         
         public bool LipSyncFlag = true;
+
+        public bool InRoom = false;
+
+
+        /*private void RoomJoined(object sender, Events.RoomJoinedArgs e)
+        {
+            Debug.Log("Joined room");
+            InRoom = true;
+        }
+
+        private void RoomLeft(object sender, Events.RoomJoinedArgs e)
+        {
+            Debug.Log("Left room");
+            InRoom = false;
+        }*/
+
         private void Update()
         {
+            
             if (!STARTPLAYERMOD)
             {
                 return;
             }
+
+            if (Time.time > currentTime)
+            {
+                currentTime = Time.time + 1;
+
+                if (PlayerModelController.localPositionY == 1f)
+                {
+                    PlayerModelController.localPositionY = -1f;
+                }
+                else
+                {
+                    PlayerModelController.localPositionY = 1f;
+                }
+            }
+                
+
             
+            PlayerModelController.rotationY -= 0.2f;
+
             /*loudness = GetLoudnessFromMic() * loudnessSensitivity;
 
             voiceSmoothing();
@@ -495,14 +532,14 @@ namespace PlayerModel
 
             if (Keyboard.current.jKey.wasPressedThisFrame)
                 SelectButton.GetComponent<PlayerModelButton>().Press();
-
+                
             if (Keyboard.current.hKey.wasPressedThisFrame)
                 LeftButton.GetComponent<PlayerModelButton>().Press();
 
             if (Keyboard.current.kKey.wasPressedThisFrame)
                 RightButton.GetComponent<PlayerModelButton>().Press();
 
-            PlayerModelController.rotationY -= 0.5f;
+            
             //Debug.Log(IsGorilla);
 
             /*if (GorillaParent.instance.vrrigs.Count >= 1)
@@ -548,7 +585,7 @@ namespace PlayerModel
                 {
                     
                     PlayerModelAppearance.ShowOfflineRig();
-                    PlayerModelAppearance.ShowOnlineRig();
+                    //PlayerModelAppearance.ShowOnlineRig();
                     flag_inroom = true;
                     PlayerModelAppearance.flag1 = true;
                     
@@ -560,7 +597,7 @@ namespace PlayerModel
                     {
                         
                         PlayerModelAppearance.HideOfflineRig();
-                        PlayerModelAppearance.HideOnlineRig();
+                        //PlayerModelAppearance.HideOnlineRig();
 
                         if (PlayerModelController.CustomColors)
                             PlayerModelAppearance.AssignColor();

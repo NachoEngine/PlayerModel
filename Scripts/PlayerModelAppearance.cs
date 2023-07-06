@@ -31,14 +31,14 @@ namespace PlayerModel.Player
         }
         static public void HideOfflineRig()
         {
-            Debug.Log("hidding gorilla");
+            //Debug.Log("hidding gorilla");
             int LayerCameraIgnore = LayerMask.NameToLayer("Bake");//hidden layer
 
-            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
+            GameObject gorillaface = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface").gameObject;
             gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            GameObject gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
             gorillabody.layer = LayerCameraIgnore;
-            GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
+            GameObject gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
             gorillachest.layer = LayerCameraIgnore;
 
 
@@ -46,11 +46,12 @@ namespace PlayerModel.Player
 
         static public void ShowOfflineRig()
         {
+            //Debug.Log("showing gorilla");
             int LayerCameraIgnore = LayerMask.NameToLayer("Default");
 
             GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
             gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            GameObject gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
             gorillabody.layer = LayerCameraIgnore;
             GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
             gorillachest.layer = LayerCameraIgnore;
@@ -110,7 +111,7 @@ namespace PlayerModel.Player
                 if (playermats[mat_index] != Plugin.player_main_material)
                 {
                     playermats[mat_index] = Plugin.player_main_material;
-                    Debug.Log("reset mat");
+                    //Debug.Log("reset mat");
                     playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
                 }
             }
@@ -176,21 +177,22 @@ namespace PlayerModel.Player
         {
             mat_index = PlayerModelController.gamemat_index;
             colormat_index = PlayerModelController.colormat_index;
-            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-            if(clone_body != null) //if in a lobby
+            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
+            //GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            if(gorillabody != null) //if in a lobby
             {
-                if (clone_body.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")//if not main mat
+                if (gorillabody.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")//if not main mat
                 {
                     if (playermats[mat_index] != Plugin.player_main_material)
                     {
                         playermats[mat_index] = Plugin.player_main_material;
-                        Debug.Log("Playermodel main mat assigned");
+                        //Debug.Log("Playermodel main mat assigned");
                     }
 
                 }
                 else
                 {
-                    playermats[mat_index] = clone_body.GetComponent<Renderer>().material; //lava ice rockstones
+                    playermats[mat_index] = gorillabody.GetComponent<Renderer>().material; //lava ice rockstones
                 }
 
                 
