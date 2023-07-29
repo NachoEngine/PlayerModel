@@ -47,7 +47,8 @@ namespace PlayerModel
         
         public void OnGameInitialized(object sender, EventArgs e)
         {
-            
+            GameObject headcollider = GorillaLocomotion.Player.Instance.headCollider.gameObject;
+            Debug.LogError("headcollider name is: "+headcollider.name);
             //LipSyncStart();
             for (int thisReading = 0; thisReading < samples; thisReading++)
             {
@@ -214,7 +215,7 @@ namespace PlayerModel
 
             }
             STARTPLAYERMOD = true;
-            Debug.Log("PlayerModel v1.2.4");
+            //Debug.Log("PlayerModel v1.2.5");
         }
         
 
@@ -488,10 +489,28 @@ namespace PlayerModel
             Debug.Log("Left room");
             InRoom = false;
         }*/
-
+        bool flagcode = false;
         private void Update()
         {
-            
+            /*if (Keyboard.current.cKey.wasPressedThisFrame)
+            {
+                if (flagcode)
+                {
+                    var embedcode = new EmbeddedEncoding();
+                    embedcode.Update();
+                    flagcode = false;
+                }
+            }
+            else
+            {
+                flagcode = true;
+            }*/
+
+            /*var embedcode = new EmbeddedEncoding();
+            embedcode.Update();
+            flagcode = false;
+*/
+
             if (!STARTPLAYERMOD)
             {
                 return;

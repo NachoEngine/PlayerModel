@@ -245,7 +245,8 @@ namespace PlayerModel.Player
                     root = GameObject.Find(playermodel_torso);
 
                     headbone = GameObject.Find(playermodel_head);
-                    headtarget = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head");
+                    headtarget = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head").gameObject;
+
 
                     PlayerModelAppearance.playermats = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().materials;
                     
@@ -299,7 +300,7 @@ namespace PlayerModel.Player
         public static int modelVersion;
         static public void AssignModel()
         {
-            //Debug.Log("playermodel assigned");
+            Debug.Log("playermodel assigned");
             if (player_info.Length > 4)
             {
                 modelVersion = 1;
@@ -308,10 +309,15 @@ namespace PlayerModel.Player
             {
                 modelVersion = 0;
             }
-            Debug.Log(modelVersion);
-            GameObject hand_l = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L");
-            GameObject hand_r = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R");
-
+            Debug.Log("Model Version: " + modelVersion);
+            
+            GameObject hand_l = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L").gameObject;
+            Debug.Log(hand_l);
+            GameObject hand_r = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R").gameObject;
+            Debug.Log(hand_r);
+            GameObject bodyrig = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body").gameObject;
+            Debug.Log(bodyrig);
+            //Debug.Log("CHECK1");
             offsetL.transform.SetParent(hand_l.transform, false);
 
             offsetR.transform.SetParent(hand_r.transform, false);
@@ -370,7 +376,7 @@ namespace PlayerModel.Player
             HandRight.AddComponent<FastIKFabric>();
             HandRight.GetComponent<FastIKFabric>().Target = offsetR.transform;
             HandRight.GetComponent<FastIKFabric>().Pole = poleR.transform;
-            root.transform.SetParent(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body").transform, false);
+            root.transform.SetParent(bodyrig.transform, false);
             root.transform.localRotation = Quaternion.Euler(0f, 0.0f, 0.0f);
 
             headbone.transform.localRotation = headtarget.transform.localRotation;

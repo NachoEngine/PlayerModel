@@ -34,11 +34,12 @@ namespace PlayerModel.Player
             //Debug.Log("hidding gorilla");
             int LayerCameraIgnore = LayerMask.NameToLayer("Bake");//hidden layer
 
-            GameObject gorillaface = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface").gameObject;
+            GameObject gorillaface = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface").gameObject;
             gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
+            GameObject gorillabody = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/gorilla");
+
             gorillabody.layer = LayerCameraIgnore;
-            GameObject gorillachest = GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
+            GameObject gorillachest = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
             gorillachest.layer = LayerCameraIgnore;
 
 
@@ -51,7 +52,7 @@ namespace PlayerModel.Player
 
             GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
             gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla");
+            GameObject gorillabody = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/gorilla");
             gorillabody.layer = LayerCameraIgnore;
             GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
             gorillachest.layer = LayerCameraIgnore;
