@@ -1,18 +1,17 @@
 ﻿using BepInEx;
-using System;
-using UnityEngine;
-using Utilla;
-using System.Reflection;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using Photon.Pun;
-using UnityEngine.UI;
-using UnityEngine.InputSystem;
 using PlayerModel.Player;
 using PlayerModel.Utils;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using Utilla;
 
 
 namespace PlayerModel
@@ -31,7 +30,7 @@ namespace PlayerModel
         {
             Utilla.Events.GameInitialized += OnGameInitialized;
         }
-        
+
 
         string rootPath;
         public static string textSavePath;
@@ -42,13 +41,13 @@ namespace PlayerModel
         public static List<Material> materials = new List<Material>();
         public static Material defMat;
         public static Material matalpha;
-        
-        
+
+        private ClientScript clientScript;
+
         
         public void OnGameInitialized(object sender, EventArgs e)
         {
-            GameObject headcollider = GorillaLocomotion.Player.Instance.headCollider.gameObject;
-            Debug.LogError("headcollider name is: "+headcollider.name);
+            
             //LipSyncStart();
             for (int thisReading = 0; thisReading < samples; thisReading++)
             {
@@ -63,7 +62,7 @@ namespace PlayerModel
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/rig/body/head/gorillaface"));
             PlayerModelAppearance.gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
 
-            
+
             rootPath = Directory.GetCurrentDirectory();
 
             playerpath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", "PlayerAssets");
@@ -159,7 +158,7 @@ namespace PlayerModel
             {
                 misc_orbs[i].AddComponent<PlayerModelButton>().button = 4 + i;
                 misc_orbs[i].GetComponent<PlayerModelButton>().setColour = false;
-                
+
             }
 
             materials.Add(Resources.Load<Material>($"objects/equipment/materials/" + "bluealive"));
@@ -171,7 +170,7 @@ namespace PlayerModel
             for (int i = 0; i < mat_preview.Length; i++)
             {
                 mat_preview[i] = misc_orbs[i].GetComponent<MeshRenderer>().material;
-                
+
             }
 
             GameObject left_empty = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -183,7 +182,7 @@ namespace PlayerModel
             left_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
             right_empty.transform.localScale = new Vector3(.03f, .5f, .03f);
 
-            
+
 
             if (File.Exists(textSavePath))
             {
@@ -217,7 +216,7 @@ namespace PlayerModel
             STARTPLAYERMOD = true;
             //Debug.Log("PlayerModel v1.2.5");
         }
-        
+
 
         public static AudioSource _audioSource;
         public static bool vflag = true;
@@ -301,23 +300,23 @@ namespace PlayerModel
 
             return totalLoudness / sampleWindow;
         }
-        
+
         static string textfilename = "PlayerModelDefault.pmdefault";
         static string split = ",";
         public static void writeToText(int index_, int IsGorilla_, string name)
         {
-            
+
             string text = index_ + split + IsGorilla_ + split + name;
             File.WriteAllText(textSavePath, text);
         }
 
         public static string[] readFromText(string path)
         {
-            
+
             string text = File.ReadAllText(textSavePath);
             string[] strings = text.Split(',');
-            
-            
+
+
             return strings;
 
         }
@@ -351,7 +350,7 @@ namespace PlayerModel
         {
             switch (button)
             {
-                
+
                 case 1:
                     //Debug.Log("Selector Button Pressed");
                     if (nachotext == false)
@@ -374,7 +373,7 @@ namespace PlayerModel
                     }
                     else//playermodel is assaigned, and spressed select button
                     {
-                        
+
                         if (assignedIndex == playerIndex)//playermodel to gorilla 
                         {
                             //Debug.Log("PlayerModel to Gorilla");
@@ -388,10 +387,10 @@ namespace PlayerModel
                             PlayerModelController.UnloadModel();
                             player_main_material = null;
 
-                            
+
                             assignedIndex = playerIndex;
-                            
-                            
+
+
                         }
                     }
                     //writeToText(assignedIndex, Convert.ToInt32(IsGorilla));
@@ -400,9 +399,9 @@ namespace PlayerModel
                     break;
                 case 2:
                     playerIndex++; //righjt
-                    //Debug.Log("Right");
-                    
-                    if (playerIndex > fileName.Length-1)
+                                   //Debug.Log("Right");
+
+                    if (playerIndex > fileName.Length - 1)
                         playerIndex = 0;
                     PlayerModelController.PreviewModel(playerIndex);
 
@@ -411,7 +410,7 @@ namespace PlayerModel
                     playerIndex--;
                     //Debug.Log("Left");
                     if (playerIndex < 0)
-                        playerIndex = fileName.Length-1;//10 items but starts from 0 so 0 to 9 = 10 items
+                        playerIndex = fileName.Length - 1;//10 items but starts from 0 so 0 to 9 = 10 items
                     PlayerModelController.PreviewModel(playerIndex);
 
                     break;
@@ -435,8 +434,8 @@ namespace PlayerModel
         }
 
         public float currentTime = 0;
-        
-        
+
+
 
         public float voiceDelay = 1;
         public const int samples = 10;
@@ -448,9 +447,9 @@ namespace PlayerModel
 
         public void voiceSmoothing()
         {
-            
+
             total -= readings[readIndex];
-            
+
             readings[readIndex] = loudness;
             // add the reading to the total:
             total = total + readings[readIndex];
@@ -461,18 +460,18 @@ namespace PlayerModel
             if (readIndex >= samples)
             {
                 // ...wrap around to the beginning:
-                
+
                 readIndex = 0;
             }
 
             // calculate the average:
             avg = total / samples;
-            
+
         }
         public static float loudness;
 
         public float LipSyncWeight = 0;
-        
+
         public bool LipSyncFlag = true;
 
         public bool InRoom = false;
@@ -529,9 +528,9 @@ namespace PlayerModel
                     PlayerModelController.localPositionY = 1f;
                 }
             }
-                
 
-            
+
+
             PlayerModelController.rotationY -= 0.2f;
 
             /*loudness = GetLoudnessFromMic() * loudnessSensitivity;
@@ -551,14 +550,14 @@ namespace PlayerModel
 
             if (Keyboard.current.jKey.wasPressedThisFrame)
                 SelectButton.GetComponent<PlayerModelButton>().Press();
-                
+
             if (Keyboard.current.hKey.wasPressedThisFrame)
                 LeftButton.GetComponent<PlayerModelButton>().Press();
 
             if (Keyboard.current.kKey.wasPressedThisFrame)
                 RightButton.GetComponent<PlayerModelButton>().Press();
 
-            
+
             //Debug.Log(IsGorilla);
 
             /*if (GorillaParent.instance.vrrigs.Count >= 1)
@@ -593,28 +592,28 @@ namespace PlayerModel
                     PlayerModelController.AssignModel();
                 }
             }
-            
-            
-                
+
+
+
 
             if (PhotonNetwork.InRoom)
-                {
-                
+            {
+
                 if (IsGorilla == true)//in a room, is gorilla model
                 {
-                    
+
                     PlayerModelAppearance.ShowOfflineRig();
                     //PlayerModelAppearance.ShowOnlineRig();
                     flag_inroom = true;
                     PlayerModelAppearance.flag1 = true;
-                    
+
                     clone_body = null;
                 }
                 else//in a room, is playermodel
                 {
                     if (playermodel != null)
                     {
-                        
+
                         PlayerModelAppearance.HideOfflineRig();
                         //PlayerModelAppearance.HideOnlineRig();
 
@@ -622,7 +621,7 @@ namespace PlayerModel
                             PlayerModelAppearance.AssignColor();
 
                         if (PlayerModelController.GameModeTextures)
-                            
+
                             PlayerModelAppearance.AssignMaterial(playermodel);
 
                         if (PlayerModelController.LipSync)
@@ -631,34 +630,34 @@ namespace PlayerModel
                         }
                     }
 
-                    
-                    
+
+
                 }
             }
             else if (!PhotonNetwork.InRoom)
             {
-                
+
 
                 flag_inroom = false;
                 clone_body = null;
                 if (IsGorilla == true)//not in a room, is gorilla model
                 {
-                    
+
                     PlayerModelAppearance.flag1 = true;
                     PlayerModelAppearance.ShowOfflineRig();
-                    
+
                 }
                 else//not in a room, is playermodel
                 {
                     playermodel = GameObject.Find("playermodel.body");
                     if (playermodel != null)
                     {
-                        
+
                         PlayerModelAppearance.ResetMaterial(playermodel);
                         PlayerModelAppearance.HideOfflineRig();
-                        
 
-                        
+
+
                         if (PlayerModelController.CustomColors)
                             PlayerModelAppearance.AssignColor();
 
@@ -670,7 +669,7 @@ namespace PlayerModel
                         }
 
                     }
-                    
+
                 }
 
             }
