@@ -16,8 +16,8 @@ using Utilla;
 
 namespace PlayerModel
 {
-    [ModdedGamemode]
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.8")]
+    
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.9")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
@@ -214,7 +214,7 @@ namespace PlayerModel
 
             }
             STARTPLAYERMOD = true;
-            //Debug.Log("PlayerModel v1.2.5");
+            
         }
 
 
@@ -263,7 +263,7 @@ namespace PlayerModel
                 else
                 {
                     _useMic = false;
-                    Debug.LogError("Micropohone is missing kwjebfiwujeenbfiubwefijbwefijbwefijwbefijwbefijwbefijwbefijwbefijwbef");
+                    
                 }
             }
         }

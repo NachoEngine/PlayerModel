@@ -8,6 +8,6 @@ namespace PlayerModel
     {
         public const string GUID = "com.nachoengine.playermodel";
         public const string Name = "PlayerModel";
-        public const string Version = "1.2.6";
+        public const string Version = "1.2.7";
     }
 }
