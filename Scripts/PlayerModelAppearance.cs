@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace PlayerModel.Player
 {
@@ -61,12 +61,12 @@ namespace PlayerModel.Player
 
 
         static Color gorillacolor;
-        
+
         static public bool flag1 = true;
-        
+
         static public Renderer rendGorilla;
 
-        
+
         static public Material mat;
         public static GameObject gorillabody;
         public static Color GetColor()
@@ -74,9 +74,9 @@ namespace PlayerModel.Player
             float r = PlayerPrefs.GetFloat("redValue");
             float g = PlayerPrefs.GetFloat("greenValue");
             float b = PlayerPrefs.GetFloat("blueValue");
-            return new Color(r,g,b);
+            return new Color(r, g, b);
 
-            
+
         }
         static public void AssignColor()
         {
@@ -96,14 +96,14 @@ namespace PlayerModel.Player
 
                 }
 
-            }                
-                
-            
+            }
+
+
         }
 
         static public void ResetMaterial(GameObject playermodel)
         {
-            
+
             mat_index = PlayerModelController.gamemat_index;
             colormat_index = PlayerModelController.colormat_index;
 
@@ -120,7 +120,7 @@ namespace PlayerModel.Player
 
         static bool IsBattleMat(GameObject tbod)
         {
-            if(tbod.GetComponent<Renderer>().material.name == "bluealive (Instance)")
+            if (tbod.GetComponent<Renderer>().material.name == "bluealive (Instance)")
             {
                 return true;
             }
@@ -172,7 +172,7 @@ namespace PlayerModel.Player
         public static int colormat_index;
         public static Material premat;
         public static Material[] playermats;//used to store reference of selected playermodel to assign back
-        
+
 
         static public void AssignMaterial(GameObject playermodel)
         {
@@ -180,7 +180,7 @@ namespace PlayerModel.Player
             colormat_index = PlayerModelController.colormat_index;
             GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
             //GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-            if(gorillabody != null) //if in a lobby
+            if (gorillabody != null) //if in a lobby
             {
                 if (gorillabody.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")//if not main mat
                 {
@@ -196,20 +196,20 @@ namespace PlayerModel.Player
                     playermats[mat_index] = gorillabody.GetComponent<Renderer>().material; //lava ice rockstones
                 }
 
-                
+
             }
             else
             {
                 playermats[mat_index] = Plugin.player_main_material;
             }
             playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
-            
 
-            
-            
-           
+
+
+
+
         }
 
-        
+
     }
 }

@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using System.IO;
-using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Linq;
-using DitzelGames.FastIK;
-using UnityEngine.XR;
+﻿using DitzelGames.FastIK;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.XR;
 
 namespace PlayerModel.Player
 {
@@ -115,7 +115,7 @@ namespace PlayerModel.Player
                             }
                             //possible bug here: if the gameMatname isnt found in the preview material list, it would be assigned to mat_preview[0] etc
                             //will make sure to have the text_info have the material name in the project, will add error logs in project
-                            
+
                         }
                         if (checkmat)
                         {
@@ -123,7 +123,7 @@ namespace PlayerModel.Player
                         }
                     }
 
-                    if(player_info.Length == 7)
+                    if (player_info.Length == 7)
                     {
                         if (bool.Parse(player_info[6]))
                         {
@@ -135,14 +135,14 @@ namespace PlayerModel.Player
                     {
                         Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
                         Plugin.SetMainDisplayButtonMaterial(player_preview.GetComponent<MeshRenderer>().material);
-                        
+
                     }
                 }
                 else
                 {
                     Plugin.mat_preview[0] = player_preview.GetComponent<MeshRenderer>().material;
                     Plugin.SetMainDisplayButtonMaterial(player_preview.GetComponent<MeshRenderer>().material);
-                    
+
                 }
 
 
@@ -159,7 +159,7 @@ namespace PlayerModel.Player
 
         static public void UnloadModel()
         {
-            
+
             GameObject.Find("RightHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
             GameObject.Find("LeftHandTriggerCollider").GetComponent<SphereCollider>().enabled = true;
 
@@ -214,7 +214,7 @@ namespace PlayerModel.Player
         {
             //Debug.Log("Loading Playermodel: "+index);
             LipSync = false;
-            
+
             AssetBundle playerbundle = AssetBundle.LoadFromFile(Path.Combine(PlayerModel.Plugin.playerpath, PlayerModel.Plugin.fileName[index]));
             if (playerbundle != null)
             {
@@ -226,7 +226,7 @@ namespace PlayerModel.Player
                     playerbundle.Unload(false);
 
                     player_info_stream = parentAsset.GetComponent<Text>().text;
-                    Debug.Log(player_info_stream);
+                    //Debug.Log(player_info_stream);
                     player_info = player_info_stream.Split('$');
 
                     parentAsset.GetComponent<Text>().enabled = false;
@@ -249,18 +249,18 @@ namespace PlayerModel.Player
 
 
                     PlayerModelAppearance.playermats = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().materials;
-                    
-                    
+
+
                     if (player_info.Length > 4)//new version of PlayerModel V2
                     {
-                       
+
                         colorMat = player_info[4];
                         gameMat = player_info[5];
 
-                        for(int i = 0; i< PlayerModelAppearance.playermats.Length; i++)
+                        for (int i = 0; i < PlayerModelAppearance.playermats.Length; i++)
                         {
                             //find Color Material
-                            if(colorMat == PlayerModelAppearance.playermats[i].name)
+                            if (colorMat == PlayerModelAppearance.playermats[i].name)
                             {
                                 colormat_index = i;
                                 //Debug.Log("Assigned Color material to: "+ i +" " + PlayerModelAppearance.playermats[i]);
@@ -278,7 +278,7 @@ namespace PlayerModel.Player
                         if (player_info.Length == 7) //PlayerModel v3
                         {
                             modelVersion = 2;
-                            Debug.Log("playermodel v3 lipsync");
+                            //Debug.Log("playermodel v3 lipsync");
                             if (bool.Parse(player_info[6]))
                             {
                                 LipSync = true;
@@ -292,7 +292,7 @@ namespace PlayerModel.Player
                         Plugin.player_main_material = PlayerModelAppearance.playermats[0]; //saves playermodel material
                     }
 
-                    
+
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace PlayerModel.Player
         public static int modelVersion;
         static public void AssignModel()
         {
-            Debug.Log("playermodel assigned");
+            //Debug.Log("playermodel assigned");
             if (player_info.Length > 4)
             {
                 modelVersion = 1;
@@ -309,14 +309,14 @@ namespace PlayerModel.Player
             {
                 modelVersion = 0;
             }
-            Debug.Log("Model Version: " + modelVersion);
-            
+            //Debug.Log("Model Version: " + modelVersion);
+
             GameObject hand_l = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L").gameObject;
-            Debug.Log(hand_l);
+            //Debug.Log(hand_l);
             GameObject hand_r = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R").gameObject;
-            Debug.Log(hand_r);
+           // Debug.Log(hand_r);
             GameObject bodyrig = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body").gameObject;
-            Debug.Log(bodyrig);
+            //Debug.Log(bodyrig);
             //Debug.Log("CHECK1");
             offsetL.transform.SetParent(hand_l.transform, false);
 
@@ -383,15 +383,15 @@ namespace PlayerModel.Player
             headoffset = headtarget.transform.localRotation;
             headbone.transform.SetParent(headtarget.transform, true);
             headbone.transform.localRotation = Quaternion.Euler(headoffset.x - 8, headoffset.y, headoffset.z);
-            headbone.transform.localPosition = new Vector3(0,0,0);
-            if(player_info.Length == 7)
+            headbone.transform.localPosition = new Vector3(0, 0, 0);
+            if (player_info.Length == 7)
             {
-                Debug.Log("scaling for v3 model");
+                //Debug.Log("scaling for v3 model");
                 Vector3 scale = new Vector3(100, 100, 100);
                 root.transform.localScale = scale;
                 headbone.transform.localScale = scale;
             }
-            
+
         }
         static public void assignDigit(GameObject hand, List<GameObject> digits)
         {
@@ -426,7 +426,7 @@ namespace PlayerModel.Player
             digits.Add(hand.transform.GetChild(thumb).gameObject);
         }
         float currentTime;
-        
+
 
         public class SpinYouBaboon : MonoBehaviour
         {
@@ -438,7 +438,7 @@ namespace PlayerModel.Player
                 transform.position = pos + new Vector3(0, to, 0);
             }
         }
-        
+
         public class fingermovement : MonoBehaviour
         {
             float remapvalue = -75.0f; //degrees
@@ -457,7 +457,7 @@ namespace PlayerModel.Player
 
             bool ready = false;
 
-            
+
             void Start()
             {
                 //Debug.Log("add smoothing script");
@@ -466,7 +466,7 @@ namespace PlayerModel.Player
                     digit_L[i].AddComponent<smoothing>();
                     digit_R[i].AddComponent<smoothing>();
                     objs.Add(digit_L[i]);
-                    
+
                 }
                 for (int i = 0; i < digit_L.Count; i++)
                 {
@@ -513,13 +513,13 @@ namespace PlayerModel.Player
                     fingermove(digit_R[1], digit_R[1].GetComponent<smoothing>().avg);
                     fingermove(digit_R[2], digit_R[2].GetComponent<smoothing>().avg);
                 }
-                
+
             }
 
             void fingermove(GameObject parent, float input)//parent digit bone, float value from vr controller input (0.0->1.0)
             {
-                float angle = Remap(input,remapvalue);//converts normalize value to relative angle to bone
-                float angle2 = Remap(input,remapvalue);
+                float angle = Remap(input, remapvalue);//converts normalize value to relative angle to bone
+                float angle2 = Remap(input, remapvalue);
                 Vector3 localAngle = parent.transform.localEulerAngles;
 
                 parent.transform.localEulerAngles = new Vector3(angle, localAngle.y, localAngle.z);//parent bone
@@ -534,9 +534,9 @@ namespace PlayerModel.Player
 
             }
 
-            float Remap(float source,float targetTo)
+            float Remap(float source, float targetTo)
             {
-                
+
                 float sourceTo = 1;
                 float sourceFrom = 0;
                 float targetFrom = 0;
@@ -567,7 +567,7 @@ namespace PlayerModel.Player
 
             void Start()
             {
-                for(int i = 0; i < readings.Length; i++)
+                for (int i = 0; i < readings.Length; i++)
                 {
                     readings[i] = 0;
                 }
@@ -576,11 +576,11 @@ namespace PlayerModel.Player
             void Update()
             {
                 total -= readings[index];
-                readings[index] = input; 
-                total += readings[index]; 
-                index++; 
+                readings[index] = input;
+                total += readings[index];
+                index++;
 
-                if(index >= samples)
+                if (index >= samples)
                 {
                     index = 0;
                 }

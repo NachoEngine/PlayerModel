@@ -11,13 +11,15 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using Utilla;
+
 
 
 namespace PlayerModel
 {
-    
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.9")]
+    /// <summary>
+    /// This is your mod's main class.
+    /// </summary>
+
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
@@ -26,11 +28,7 @@ namespace PlayerModel
         static public string _selectedDevice;
         static public AudioMixerGroup _mixerGroupMic;
         static public bool Cheaking = true;
-        void Awake()
-        {
-            Utilla.Events.GameInitialized += OnGameInitialized;
-        }
-
+        
 
         string rootPath;
         public static string textSavePath;
@@ -44,16 +42,19 @@ namespace PlayerModel
 
         private ClientScript clientScript;
 
-        
-        public void OnGameInitialized(object sender, EventArgs e)
+        void Awake()
         {
-            
+            Utilla.Events.GameInitialized += OnGameInitialized;
+        }
+        void OnGameInitialized(object sender, EventArgs e)
+        {
+            //Debug.Log("PlayerModel Start");
             //LipSyncStart();
-            for (int thisReading = 0; thisReading < samples; thisReading++)
+            /*for (int thisReading = 0; thisReading < samples; thisReading++)
             {
                 readings[thisReading] = 0;
-            }
-
+            }*/
+            //Debug.Log("PlayerModel this");
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest"));
             PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface"));
@@ -214,7 +215,7 @@ namespace PlayerModel
 
             }
             STARTPLAYERMOD = true;
-            
+            Debug.Log("PlayerModel Ready");
         }
 
 
@@ -288,7 +289,7 @@ namespace PlayerModel
             float[] waveData = new float[sampleWindow];
             clip.GetData(waveData, startPosition);
 
-            //compute loudness
+            
 
             float totalLoudness = 0;
 
@@ -477,38 +478,9 @@ namespace PlayerModel
         public bool InRoom = false;
 
 
-        /*private void RoomJoined(object sender, Events.RoomJoinedArgs e)
-        {
-            Debug.Log("Joined room");
-            InRoom = true;
-        }
-
-        private void RoomLeft(object sender, Events.RoomJoinedArgs e)
-        {
-            Debug.Log("Left room");
-            InRoom = false;
-        }*/
         bool flagcode = false;
         private void Update()
         {
-            /*if (Keyboard.current.cKey.wasPressedThisFrame)
-            {
-                if (flagcode)
-                {
-                    var embedcode = new EmbeddedEncoding();
-                    embedcode.Update();
-                    flagcode = false;
-                }
-            }
-            else
-            {
-                flagcode = true;
-            }*/
-
-            /*var embedcode = new EmbeddedEncoding();
-            embedcode.Update();
-            flagcode = false;
-*/
 
             if (!STARTPLAYERMOD)
             {
