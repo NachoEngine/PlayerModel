@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
 
 
 
@@ -21,14 +22,17 @@ namespace PlayerModel
     /// </summary>
 
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.10")]
+
     public class Plugin : BaseUnityPlugin
     {
+        static public Texture texture_;
         static public AudioClip _audioClip;
         static public bool _useMic = true;
         static public string _selectedDevice;
         static public AudioMixerGroup _mixerGroupMic;
         static public bool Cheaking = true;
-        
+
 
         string rootPath;
         public static string textSavePath;
@@ -40,14 +44,140 @@ namespace PlayerModel
         public static Material defMat;
         public static Material matalpha;
 
-        private ClientScript clientScript;
+        public static Shader UberShader = Shader.Find("GorillaTag/UberShader");
+        public static Shader unlitShader;
+        //public static Shader UberShader = Shader.Find("Gorilla/Standard (GT)");
+
+        public static Material updateMaterial(Material oldmat)
+        {
+            
+            if (oldmat.shader == UberShader)
+            {
+                //Debug.Log("has same material");
+                return oldmat;
+            }
+            //Debug.Log("---- " + oldmat.shader.name);
+
+            string color_ = "";
+            string tex_ = "";
+            Material newmat = new Material(UberShader);
+
+            newmat.shaderKeywords = new string[]
+            {
+                "_USE_TEXTURE"
+            };
+            newmat.name = oldmat.name;
+            //Debug.Log("Old Name: " + oldmat.name);
+            //Debug.Log("new Name: " + newmat.name);
+            /*if(oldmat.shader.name == "Standard")
+            {
+                color_ = "_Color";
+                tex_ = "tex_";
+            }*/
+
+            newmat.SetFloat("_Cull",2f);
+            if (newmat.HasFloat("_Cull"))
+            {
+                newmat.SetFloat("_Cull", 2f);
+               // Debug.Log("Cull property set");
+            }
+            else
+            {
+                //Debug.LogError("Cull property missing");
+            }
+
+            color_ = "_Color";
+            tex_ = "_MainTex";
+
+            if (oldmat.shader.name == "Custom/playermodel_new" || oldmat.shader.name == "Custom/playermodel")
+            {
+                //Debug.Log("#######################################PlayerModel Shader");
+                color_ = "_Color";
+                tex_ = "_texture";
+            }
+
+            if (oldmat.HasProperty(color_))
+            {
+                newmat.color = oldmat.GetColor(color_);
+            }
+            else
+            {
+                //Debug.Log("color: "+color_ +" prop missing");
+            }
+            if (oldmat.HasProperty(tex_))
+            {
+                
+                //Debug.Log("Copying texture: " + oldmat.GetTexture(tex_).name);
+                Texture texture = oldmat.GetTexture(tex_);
+                
+                //newmat.SetTexture("_MainTex", oldmat.GetTexture(tex_));
+                if (texture != null)
+                {
+                    texture_ = texture;
+                    
+                    //newmat.SetTexture("_MainTex", oldmat.GetTexture(tex_));
+                    newmat.mainTexture = texture_;
+                    
+                }
+                else
+                {
+                    
+                    //Debug.LogError(tex_ + " property is null");
+                }
+
+
+
+            }
+            else
+            {
+                //Debug.Log("texture: "+ tex_+" prop missing");
+            }
+            //Debug.Log("new Name (Before Return: " + newmat.name);
+            return newmat;
+        }
+        
+        public static Vector4 Vector4(Color c)
+        {
+            Vector4 color_v = new Vector4(c.r, c.g, c.b, c.a);
+            return color_v;
+        }
+        //private ClientScript clientScript;
 
         void Awake()
         {
             Utilla.Events.GameInitialized += OnGameInitialized;
         }
+        public static void updateMaterialArray(GameObject obj)
+        {
+            //Debug.Log(obj);
+            Renderer rend = obj.GetComponent<Renderer>();
+            if (rend != null)
+            {
+
+                Material[] updatedMaterials = new Material[rend.materials.Length];
+
+                for (int j = 0; j < updatedMaterials.Length; j++)
+                {
+
+                    updatedMaterials[j] = updateMaterial(rend.materials[j]);
+                    //Debug.Log("Updated New Material: " + updatedMaterials[j]);
+                    //Debug.Log(updatedMaterials[j].name + " #" + j);
+                }
+                //Debug.Log("before update function: " + updatedMaterials[0].name);
+                rend.materials = updatedMaterials;
+
+                for(int i=0; i<updatedMaterials.Length; i++)
+                {
+                    rend.materials[i].name = updatedMaterials[i].name;
+                    //Debug.Log("Assigned Name to rend: "+rend.materials[i]);
+                }
+
+            }
+        }
         void OnGameInitialized(object sender, EventArgs e)
         {
+
+           
             //Debug.Log("PlayerModel Start");
             //LipSyncStart();
             /*for (int thisReading = 0; thisReading < samples; thisReading++)
@@ -55,15 +185,14 @@ namespace PlayerModel
                 readings[thisReading] = 0;
             }*/
             //Debug.Log("PlayerModel this");
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/gorilla"));
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/gorillachest"));
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface"));
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/gorilla"));
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/rig/body/gorillachest"));
-            PlayerModelAppearance.playerGameObjects.Add(GameObject.Find("Global/Local VRRig/Actual Gorilla/rig/body/head/gorillaface"));
-            PlayerModelAppearance.gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
 
+            PlayerModelAppearance.gorillabody = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/gorilla");
+            PlayerModelAppearance.gorillachest = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/gorillachest");
+            PlayerModelAppearance.gorillaface = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface");
+            GameObject gt_body = PlayerModelAppearance.gorillabody;
 
+            Material gt_mat = gt_body.GetComponent<Renderer>().material;
+           // Debug.Log("Gorilla Cull Mode: " + gt_mat.GetFloat("_Cull"));
             rootPath = Directory.GetCurrentDirectory();
 
             playerpath = Path.Combine(rootPath, "BepInEx", "Plugins", "PlayerModel", "PlayerAssets");
@@ -120,11 +249,25 @@ namespace PlayerModel
             var localasset = Instantiate(asset);
 
             DontDestroyOnLoad(localasset);
-            //Debug.Log("MISC Loaded");
+            
             GameObject misc = localasset.transform.GetChild(0).gameObject;
+            //Debug.Log("MISC Loaded");
+            //Debug.Log(misc.name);
 
+            for (int i = 0; i < misc.transform.childCount; i++)
+            {
+                //Debug.Log(misc.transform.GetChild(i));
+
+                GameObject child = misc.transform.GetChild(i).gameObject;
+                updateMaterialArray(child);
+                
+            }
+            //Debug.Log("misc mat updated");
             misc.transform.position = new Vector3(-53.3f, 16.216f, -124.6f);
             misc.transform.localRotation = Quaternion.Euler(0f, -60f, 0f);
+
+            //misc.transform.position = new Vector3(-66.54f, 11.3f, -82.55f);
+            //misc.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
             //Debug.Log("MISC Child");
             SelectButton = misc.transform.Find("misc.selector").gameObject;
             //Debug.Log("MISC selectbutton");
@@ -215,7 +358,17 @@ namespace PlayerModel
 
             }
             STARTPLAYERMOD = true;
-            Debug.Log("PlayerModel Ready");
+            //Debug.Log("PlayerModel Ready");
+
+            Stream str_shader = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlayerModel.Assets.shader");
+            AssetBundle bundle_shader = AssetBundle.LoadFromStream(str_shader);
+            GameObject asset_shader = bundle_shader.LoadAsset<GameObject>("Sphere");
+            var localasset_shader = Instantiate(asset_shader);
+
+            GameObject shader_sphere = localasset_shader;
+            shader_sphere.transform.position = new Vector3(-66.54f, 12f, -84f);
+            shader_sphere.transform.localScale = new Vector3(0.2f,0.2f,0.2f);
+            shader_sphere.SetActive(false);
         }
 
 
@@ -245,7 +398,7 @@ namespace PlayerModel
                     _audioSource = voiceObject.AddComponent<AudioSource>();
 
                     _selectedDevice = Microphone.devices[0].ToString();
-                    Debug.Log(_selectedDevice);
+                    //Debug.Log(_selectedDevice);
                     _audioSource.clip = Microphone.Start(_selectedDevice, true, 5, AudioSettings.outputSampleRate);
 
                     _audioSource.spatialBlend = 1f;
@@ -345,8 +498,14 @@ namespace PlayerModel
         static public bool STARTPLAYERMOD = false;
         static public int assignedIndex = 0;// index of array, 
 
-        public static void SetMainDisplayButtonMaterial(Material material) => misc_orbs[0].GetComponent<MeshRenderer>().material = material;
+        public static void SetMainDisplayButtonMaterial(Material material)
+        {
+            //Debug.Log("input material" + material.shader + ", " + material.name);
+            //Debug.Log("orb mat is now: " + misc_orbs[0].GetComponent<MeshRenderer>().material.shader);
+            misc_orbs[0].GetComponent<MeshRenderer>().material = material;
 
+
+        }
         public static void ButtonPress(int button)
         {
             switch (button)
@@ -371,6 +530,7 @@ namespace PlayerModel
                         assignedIndex = playerIndex;
                         IsGorilla = false;
                         PlayerModelController.AssignModel();
+                        
                     }
                     else//playermodel is assaigned, and spressed select button
                     {
@@ -630,10 +790,10 @@ namespace PlayerModel
 
 
 
-                        if (PlayerModelController.CustomColors)
-                            PlayerModelAppearance.AssignColor();
+                        //if (PlayerModelController.CustomColors)
+                            //PlayerModelAppearance.AssignColor();
 
-                        PlayerModelAppearance.AssignMaterial(playermodel);
+                        //PlayerModelAppearance.AssignMaterial(playermodel);
 
                         if (PlayerModelController.LipSync)
                         {

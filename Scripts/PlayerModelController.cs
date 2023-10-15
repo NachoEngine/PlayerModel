@@ -11,6 +11,8 @@ namespace PlayerModel.Player
 {
     public class PlayerModelController : MonoBehaviour
     {
+        List<Material> previewMats = new List<Material>();
+        List<Material> playermodelMats = new List<Material>();
         static public GameObject misc_orb;
 
         static public string playermodel_head = "playermodel.head";
@@ -68,17 +70,27 @@ namespace PlayerModel.Player
 
                 playermodel_name = player_info[0];
                 playermodel_author = player_info[1];
-
                 player_body = parentAsset.transform.GetChild(0).gameObject.transform.Find("playermodel.body").gameObject;
+                //Debug.Log(player_body.GetComponent<SkinnedMeshRenderer>().materials[0].name);
+                Plugin.updateMaterialArray(player_body);
+                //Debug.Log(player_body.GetComponent<SkinnedMeshRenderer>().materials[0].name);
                 List<Material> material_list = player_body.GetComponent<SkinnedMeshRenderer>().materials.ToList();
+                /*Debug.Log("Checking mats names after update:");
+                for (int i = 0; i < material_list.Count; i++)
+                {
+                    Debug.Log(material_list[i].name);
+                }
+                Debug.Log("Finished");*/
 
                 Material[] material_array = material_list.ToArray();
-
+                
                 player_preview = new GameObject("playemodel.preview");
+                Plugin.updateMaterialArray(player_preview);
+
                 var meshFilter = player_preview.AddComponent<MeshFilter>();
                 Mesh originalMesh = player_body.GetComponent<SkinnedMeshRenderer>().sharedMesh;
                 meshFilter.mesh = originalMesh;
-                MeshRenderer rend = player_preview.AddComponent<MeshRenderer>();//easy code really
+                MeshRenderer rend = player_preview.AddComponent<MeshRenderer>();
                 rend.materials = material_array;
                 player_preview.transform.localScale = player_body.transform.localScale;
                 pos = Plugin.misc_preview.transform.position;
@@ -89,9 +101,9 @@ namespace PlayerModel.Player
 
                 Plugin.model_text.text = playermodel_name.ToUpper(); ;
                 Plugin.author_text.text = playermodel_author.ToUpper();
-
+                
                 //new playermodel info here:
-                if (player_info.Length > 4)
+                if (player_info.Length > 4) //bugs here manwefwefwefwewefwewefwewefwefwefwefwefwefwefwefwefwvrwgfsdvwfsdvwefacwefasf
                 {
                     Plugin.mat_preview[0] = null;
                     Plugin.SetMainDisplayButtonMaterial(Plugin.mat_preview[0]);
@@ -102,12 +114,14 @@ namespace PlayerModel.Player
 
                     if (gamemodetex)//player_info[5] is the gameMat assigned material name
                     {
-                        //Debug.Log("Mat Search start");
+                        //Debug.Log("Mat Search start: " + gameMatname);
                         for (int i = 0; i < material_array.Length; i++)//cycles mat list to match material name to assign gameMat changing
                         {
+                            
                             //Debug.Log(material_array[i].name);
-                            if (gameMatname == material_array[i].name)
+                            if (gameMatname == material_array[i].name || gameMatname + " (Instance)" == material_array[i].name)
                             {
+                                
                                 Plugin.mat_preview[0] = material_array[i];
                                 Plugin.SetMainDisplayButtonMaterial(material_array[i]);
                                 checkmat = false;
@@ -119,7 +133,7 @@ namespace PlayerModel.Player
                         }
                         if (checkmat)
                         {
-                            Debug.LogError("Material Reference not Found");
+                            //Debug.LogError("Material Reference not Found: "+ gameMatname);
                         }
                     }
 
@@ -208,6 +222,7 @@ namespace PlayerModel.Player
         public static List<GameObject> digit_R = new List<GameObject>();
         public static List<GameObject> digit_L = new List<GameObject>();
 
+        public VRRig rig;
 
         public static Quaternion headoffset;
         static public void LoadModel(int index)
@@ -224,6 +239,10 @@ namespace PlayerModel.Player
                     var parentAsset = Instantiate(assetplayer);
 
                     playerbundle.Unload(false);
+
+                    GameObject playermodel = GameObject.Find("playermodel.body");
+
+                    Plugin.updateMaterialArray(playermodel);
 
                     player_info_stream = parentAsset.GetComponent<Text>().text;
                     //Debug.Log(player_info_stream);
@@ -245,17 +264,21 @@ namespace PlayerModel.Player
                     root = GameObject.Find(playermodel_torso);
 
                     headbone = GameObject.Find(playermodel_head);
-                    headtarget = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head").gameObject;
+                    headtarget = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/head");
+                    
 
-
-                    PlayerModelAppearance.playermats = GameObject.Find("playermodel.body").GetComponent<SkinnedMeshRenderer>().materials;
-
-
+                    PlayerModelAppearance.playermats = playermodel.GetComponent<SkinnedMeshRenderer>().materials;
+                    foreach(Material mat in PlayerModelAppearance.playermats){
+                        //Debug.Log("New Material: " + mat + " -- " + "Shader: " + mat.shader.name);
+                    }
+                    //Debug.Log("PlayerModel Info Length: "+ player_info.Length);
                     if (player_info.Length > 4)//new version of PlayerModel V2
                     {
 
                         colorMat = player_info[4];
+                        //Debug.Log("Color Material: " + colorMat);
                         gameMat = player_info[5];
+                        //Debug.Log("GameMode Material: " + gameMat);
 
                         for (int i = 0; i < PlayerModelAppearance.playermats.Length; i++)
                         {
@@ -290,6 +313,7 @@ namespace PlayerModel.Player
                         gamemat_index = 0;
                         colormat_index = 0;
                         Plugin.player_main_material = PlayerModelAppearance.playermats[0]; //saves playermodel material
+                        
                     }
 
 
@@ -300,7 +324,7 @@ namespace PlayerModel.Player
         public static int modelVersion;
         static public void AssignModel()
         {
-            //Debug.Log("playermodel assigned");
+           // Debug.Log("Start playermodel assigning");
             if (player_info.Length > 4)
             {
                 modelVersion = 1;
@@ -310,12 +334,12 @@ namespace PlayerModel.Player
                 modelVersion = 0;
             }
             //Debug.Log("Model Version: " + modelVersion);
-
-            GameObject hand_l = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L").gameObject;
+            
+            GameObject hand_l = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L");
             //Debug.Log(hand_l);
-            GameObject hand_r = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R").gameObject;
-           // Debug.Log(hand_r);
-            GameObject bodyrig = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body").gameObject;
+            GameObject hand_r = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R");
+            // Debug.Log(hand_r);
+            GameObject bodyrig = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body");
             //Debug.Log(bodyrig);
             //Debug.Log("CHECK1");
             offsetL.transform.SetParent(hand_l.transform, false);
@@ -326,16 +350,16 @@ namespace PlayerModel.Player
             poleR.transform.SetParent(root.transform, false);
             poleL = new GameObject("poleL");
             poleL.transform.SetParent(root.transform, false);
-
+            //Debug.Log("check1-2");
             poleL.transform.localPosition = new Vector3(-5f, -5f, -10);
             poleR.transform.localPosition = new Vector3(5f, -5f, -10);
-
+            //Debug.Log("check2");
             GameObject lefthandpos = new GameObject("playermodel.lefthandpos");
             GameObject righthandpos = new GameObject("playermodel.righthandpos");
-
+            //Debug.Log("check3");
             GameObject lefthandparent = HandLeft.transform.parent.gameObject;
             GameObject righthandparent = HandRight.transform.parent.gameObject;
-
+            //Debug.Log("check4");
             lefthandpos.transform.SetParent(lefthandparent.transform, false);
             righthandpos.transform.SetParent(righthandparent.transform, false);
 
@@ -356,7 +380,7 @@ namespace PlayerModel.Player
 
             HandLeft.transform.SetParent(hand_l.transform, true);
             HandRight.transform.SetParent(hand_r.transform, true);
-
+            
             //get each digit on each hand (parent bone of each digit)
 
             if (modelVersion > 0)
@@ -450,8 +474,7 @@ namespace PlayerModel.Player
             public float leftTrigger;
             public bool leftSecondary;
 
-            public readonly XRNode lNode = XRNode.LeftHand;
-            public readonly XRNode rNode = XRNode.RightHand;
+            
 
             List<GameObject> objs = new List<GameObject>();
 
@@ -487,13 +510,13 @@ namespace PlayerModel.Player
             {
                 if (ready)
                 {
-                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.grip, out leftGrip);
-                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out leftTrigger);
-                    InputDevices.GetDeviceAtXRNode(lNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out leftSecondary);
+                    leftGrip = ControllerInputPoller.instance.leftControllerGripFloat;
+                    leftTrigger = ControllerInputPoller.instance.leftControllerIndexFloat;
+                    leftSecondary = ControllerInputPoller.instance.leftControllerPrimaryButton;
 
-                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.grip, out rightGrip);
-                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out rightTrigger);
-                    InputDevices.GetDeviceAtXRNode(rNode).TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out rightSecondary);
+                    rightGrip = ControllerInputPoller.instance.rightControllerGripFloat;
+                    rightTrigger = ControllerInputPoller.instance.rightControllerIndexFloat;
+                    rightSecondary = ControllerInputPoller.instance.rightControllerPrimaryButton;
 
                     digit_L[0].GetComponent<smoothing>().input = leftTrigger;
                     digit_L[1].GetComponent<smoothing>().input = leftGrip;

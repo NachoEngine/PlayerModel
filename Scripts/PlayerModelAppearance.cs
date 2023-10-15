@@ -5,14 +5,17 @@ namespace PlayerModel.Player
 {
     public class PlayerModelAppearance : MonoBehaviour
     {
-        public static List<GameObject> playerGameObjects = new List<GameObject>();
+        public static GameObject gorillabody;
+        public static GameObject gorillaface;
+        public static GameObject gorillachest;
+
         public static GameObject serverGameObject;
 
         static public void ShowOnlineRig()
         {
-            GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
-            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-            GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
+            GameObject clone_face = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
+            GameObject clone_body = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            GameObject clone_chest = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
 
             clone_face.GetComponent<MeshRenderer>().forceRenderingOff = false;
             clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = false;
@@ -21,9 +24,9 @@ namespace PlayerModel.Player
 
         static public void HideOnlineRig()
         {
-            GameObject clone_face = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
-            GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
-            GameObject clone_chest = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
+            GameObject clone_face = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/head/gorillaface");
+            GameObject clone_body = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            GameObject clone_chest = GameObject.Find("Player Objects/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/rig/body/gorillachest");
 
             clone_face.GetComponent<MeshRenderer>().forceRenderingOff = true;
             clone_body.GetComponent<SkinnedMeshRenderer>().forceRenderingOff = true;
@@ -33,42 +36,33 @@ namespace PlayerModel.Player
         {
             //Debug.Log("hidding gorilla");
             int LayerCameraIgnore = LayerMask.NameToLayer("Bake");//hidden layer
-
-            GameObject gorillaface = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/head/gorillaface").gameObject;
+            
             gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/gorilla");
-
             gorillabody.layer = LayerCameraIgnore;
-            GameObject gorillachest = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/rig/body/gorillachest").gameObject;
             gorillachest.layer = LayerCameraIgnore;
-
 
         }
 
         static public void ShowOfflineRig()
         {
             //Debug.Log("showing gorilla");
-            int LayerCameraIgnore = LayerMask.NameToLayer("Default");
+            int LayerCameraShow = LayerMask.NameToLayer("Default");
 
-            GameObject gorillaface = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/head/gorillaface").gameObject;
-            gorillaface.layer = LayerCameraIgnore;
-            GameObject gorillabody = GameObject.Find("Player Objects/Local VRRig/Local Gorilla Player/gorilla");
-            gorillabody.layer = LayerCameraIgnore;
-            GameObject gorillachest = GorillaTagger.Instance.offlineVRRig.mainSkin.transform.parent.Find("rig/body/gorillachest").gameObject;
-            gorillachest.layer = LayerCameraIgnore;
+            
+            gorillaface.layer = LayerCameraShow;
+            
+            gorillabody.layer = LayerCameraShow;
+            
+            gorillachest.layer = LayerCameraShow;
 
         }
 
 
         static Color gorillacolor;
-
         static public bool flag1 = true;
-
         static public Renderer rendGorilla;
-
-
         static public Material mat;
-        public static GameObject gorillabody;
+
         public static Color GetColor()
         {
             float r = PlayerPrefs.GetFloat("redValue");
@@ -114,59 +108,12 @@ namespace PlayerModel.Player
                     playermats[mat_index] = Plugin.player_main_material;
                     //Debug.Log("reset mat");
                     playermodel.GetComponent<SkinnedMeshRenderer>().materials = playermats;
+                    //Debug.Log(playermats);
                 }
             }
         }
 
-        static bool IsBattleMat(GameObject tbod)
-        {
-            if (tbod.GetComponent<Renderer>().material.name == "bluealive (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "bluehit (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "bluestunned (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "orangealive (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "orangehit (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "orangestunned (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "paintsplattersmallblue (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "paintsplattersmallorange (Instance)")
-            {
-                return true;
-            }
-            return false;
-        }
 
-        static bool IsBattleMat2(GameObject tbod)
-        {
-            if (tbod.GetComponent<Renderer>().material.name == "paintsplattersmallblue (Instance)")
-            {
-                return true;
-            }
-            if (tbod.GetComponent<Renderer>().material.name == "paintsplattersmallorange (Instance)")
-            {
-                return true;
-            }
-            return false;
-        }
 
         public static int mat_index;
         public static int colormat_index;
@@ -178,8 +125,7 @@ namespace PlayerModel.Player
         {
             mat_index = PlayerModelController.gamemat_index;
             colormat_index = PlayerModelController.colormat_index;
-            GameObject gorillabody = GorillaTagger.Instance.offlineVRRig.mainSkin.gameObject;
-            //GameObject clone_body = GameObject.Find("Global/GorillaParent/GorillaVRRigs/Gorilla Player Networked(Clone)/gorilla");
+            
             if (gorillabody != null) //if in a lobby
             {
                 if (gorillabody.GetComponent<Renderer>().material.name == "darkfur 1(Clone) (Instance)")//if not main mat
